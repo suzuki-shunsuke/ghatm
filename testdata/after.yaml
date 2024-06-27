@@ -18,13 +18,13 @@ jobs:
         timeout-minutes: 5
 
   zoo:
-    set-timeout: 30
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
   yoo:
-    set-timeout: 30
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
