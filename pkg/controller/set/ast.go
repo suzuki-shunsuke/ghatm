@@ -35,7 +35,7 @@ func parseWorkflowAST(content []byte, jobNames map[string]struct{}) ([]*Position
 func parseDocAST(doc *ast.DocumentNode, jobNames map[string]struct{}) ([]*Position, error) {
 	body, ok := doc.Body.(*ast.MappingNode)
 	if !ok {
-		return nil, nil
+		return nil, errors.New("document body must be *ast.MappingNode")
 	}
 	// jobs:
 	//   jobName:
@@ -43,7 +43,7 @@ func parseDocAST(doc *ast.DocumentNode, jobNames map[string]struct{}) ([]*Positi
 	//     steps:
 	jobsNode := findJobsNode(body.Values)
 	if jobsNode == nil {
-		return nil, nil
+		return nil, errors.New("the field 'jobs' is required")
 	}
 	return parseDocValue(jobsNode, jobNames)
 }
@@ -61,13 +61,23 @@ func findJobsNode(values []*ast.MappingValueNode) *ast.MappingValueNode {
 	return nil
 }
 
-func parseDocValue(value *ast.MappingValueNode, jobNames map[string]struct{}) ([]*Position, error) {
-	jobs, ok := value.Value.(*ast.MappingNode)
-	if !ok {
-		return nil, errors.New("jobs must be a map")
+func getMappingValueNodes(value *ast.MappingValueNode) ([]*ast.MappingValueNode, error) {
+	switch node := value.Value.(type) {
+	case *ast.MappingNode:
+		return node.Values, nil
+	case *ast.MappingValueNode:
+		return []*ast.MappingValueNode{node}, nil
 	}
-	arr := make([]*Position, 0, len(jobs.Values))
-	for _, job := range jobs.Values {
+	return nil, errors.New("value must be either a *ast.MappingNode or a *ast.MappingValueNode")
+}
+
+func parseDocValue(value *ast.MappingValueNode, jobNames map[string]struct{}) ([]*Position, error) {
+	values, err := getMappingValueNodes(value)
+	if err != nil {
+		return nil, err
+	}
+	arr := make([]*Position, 0, len(values))
+	for _, job := range values {
 		pos, err := parseJobAST(job, jobNames)
 		if err != nil {
 			return nil, err
@@ -89,14 +99,14 @@ func parseJobAST(value *ast.MappingValueNode, jobNames map[string]struct{}) (*Po
 	if _, ok := jobNames[jobName]; !ok {
 		return nil, nil //nolint:nilnil
 	}
-	fields, ok := value.Value.(*ast.MappingNode)
-	if !ok {
-		return nil, errors.New("job value must be a *ast.MappingNode")
+	fields, err := getMappingValueNodes(value)
+	if err != nil {
+		return nil, err
 	}
-	if len(fields.Values) == 0 {
+	if len(fields) == 0 {
 		return nil, errors.New("job doesn't have any field")
 	}
-	firstValue := fields.Values[0]
+	firstValue := fields[0]
 	pos := firstValue.Key.GetToken().Position
 	return &Position{
 		Line:   pos.Line - 1,
