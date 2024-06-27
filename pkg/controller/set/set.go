@@ -1,8 +1,6 @@
 package set
 
 import (
-	"context"
-
 	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/logrus-error/logerr"
 )
@@ -12,7 +10,7 @@ type Param struct {
 	TimeoutMinutes int
 }
 
-func (c *Controller) Set(_ context.Context, _ *logrus.Entry, param *Param) error {
+func (c *Controller) Set(param *Param) error {
 	files := param.Files
 	if len(files) == 0 {
 		a, err := FindWorkflows(c.fs)
