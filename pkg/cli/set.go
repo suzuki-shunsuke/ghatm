@@ -3,8 +3,8 @@ package cli
 import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
-	"github.com/suzuki-shunsuke/gha-set-timeout-minutes/pkg/controller/set"
-	"github.com/suzuki-shunsuke/gha-set-timeout-minutes/pkg/log"
+	"github.com/suzuki-shunsuke/ghatm/pkg/controller/set"
+	"github.com/suzuki-shunsuke/ghatm/pkg/log"
 	"github.com/urfave/cli/v2"
 )
 
@@ -16,10 +16,10 @@ func (rc *setCommand) command() *cli.Command {
 	return &cli.Command{
 		Name:      "set",
 		Usage:     "Set timeout-minutes to GitHub Actions jobs which don't have timeout-minutes",
-		UsageText: "gha-set-timeout-minutes set",
+		UsageText: "ghatm set",
 		Description: `Set timeout-minutes to GitHub Actions jobs which don't have timeout-minutes.
 
-$ gha-set-timeout-minutes set
+$ ghatm set
 `,
 		Action: rc.action,
 		Flags: []cli.Flag{

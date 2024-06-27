@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/spf13/afero"
-	"github.com/suzuki-shunsuke/gha-set-timeout-minutes/pkg/osfile"
+	"github.com/suzuki-shunsuke/ghatm/pkg/osfile"
 )
 
 const (

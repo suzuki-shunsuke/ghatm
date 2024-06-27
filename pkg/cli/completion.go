@@ -25,15 +25,15 @@ e.g.
 
 .bash_profile
 
-source <(gha-set-timeout-minutes completion bash)
+source <(ghatm completion bash)
 
 .zprofile
 
-source <(gha-set-timeout-minutes completion zsh)
+source <(ghatm completion zsh)
 
 fish
 
-gha-set-timeout-minutes completion fish > ~/.config/fish/completions/gha-set-timeout-minutes.fish
+ghatm completion fish > ~/.config/fish/completions/ghatm.fish
 `,
 		Subcommands: []*cli.Command{
 			{
@@ -74,16 +74,16 @@ _cli_bash_autocomplete() {
   fi
 }
 
-complete -o bashdefault -o default -o nospace -F _cli_bash_autocomplete gha-set-timeout-minutes`)
+complete -o bashdefault -o default -o nospace -F _cli_bash_autocomplete ghatm`)
 	return nil
 }
 
 func (cc *completionCommand) zshCompletionAction(*cli.Context) error {
 	// https://github.com/urfave/cli/blob/main/autocomplete/zsh_autocomplete
 	// https://github.com/urfave/cli/blob/947f9894eef4725a1c15ed75459907b52dde7616/autocomplete/zsh_autocomplete
-	fmt.Fprintln(cc.stdout, `#compdef gha-set-timeout-minutes
+	fmt.Fprintln(cc.stdout, `#compdef ghatm
 
-_gha-set-timeout-minutes() {
+_ghatm() {
   local -a opts
   local cur
   cur=${words[-1]}
@@ -100,10 +100,10 @@ _gha-set-timeout-minutes() {
   fi
 }
 
-if [ "$funcstack[1]" = "_gha-set-timeout-minutes" ]; then
-  _gha-set-timeout-minutes "$@"
+if [ "$funcstack[1]" = "_ghatm" ]; then
+  _ghatm "$@"
 else
-  compdef _gha-set-timeout-minutes gha-set-timeout-minutes
+  compdef _ghatm ghatm
 fi`)
 	return nil
 }

@@ -1,4 +1,4 @@
-module github.com/suzuki-shunsuke/gha-set-timeout-minutes
+module github.com/suzuki-shunsuke/ghatm
 
 go 1.22.4
 

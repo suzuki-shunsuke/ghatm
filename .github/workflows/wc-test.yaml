@@ -25,5 +25,5 @@ jobs:
         env:
           AQUA_GITHUB_TOKEN: ${{github.token}}
       - run: go test -v ./... -race -covermode=atomic
-      - run: go run ./cmd/gha-set-timeout-minutes set testdata/before.yaml
+      - run: go run ./cmd/ghatm set testdata/before.yaml
       - run: diff testdata/before.yaml testdata/after.yaml
