@@ -26,7 +26,6 @@ func (c *Controller) handleWorkflow(file string, timeout int) error {
 	if len(positions) == 0 {
 		return nil
 	}
-	fixLines(positions)
 
 	lines, err := insertTimeout(b, positions, timeout)
 	if err != nil {
@@ -34,12 +33,6 @@ func (c *Controller) handleWorkflow(file string, timeout int) error {
 	}
 
 	return c.writeWorkflow(file, lines)
-}
-
-func fixLines(positions []*Position) {
-	for i, pos := range positions {
-		pos.Line += i
-	}
 }
 
 func insertTimeout(content []byte, positions []*Position, timeout int) ([]string, error) {
@@ -59,10 +52,10 @@ func insertTimeout(content []byte, positions []*Position, timeout int) ([]string
 			lines = append(lines, indent+fmt.Sprintf("timeout-minutes: %d", timeout))
 			if posIndex == lastPosIndex {
 				pos.Line = -1
-				continue
+			} else {
+				posIndex++
+				pos = positions[posIndex]
 			}
-			posIndex++
-			pos = positions[posIndex]
 		}
 		lines = append(lines, line)
 	}

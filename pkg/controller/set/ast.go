@@ -24,6 +24,9 @@ func parseWorkflowAST(content []byte, jobNames map[string]struct{}) ([]*Position
 		if err != nil {
 			return nil, err
 		}
+		if len(arr) == 0 {
+			continue
+		}
 		list = append(list, arr...)
 	}
 	return list, nil
@@ -69,6 +72,9 @@ func parseDocValue(value *ast.MappingValueNode, jobNames map[string]struct{}) ([
 		if err != nil {
 			return nil, err
 		}
+		if pos == nil {
+			continue
+		}
 		arr = append(arr, pos)
 	}
 	return arr, nil
@@ -93,7 +99,7 @@ func parseJobAST(value *ast.MappingValueNode, jobNames map[string]struct{}) (*Po
 	firstValue := fields.Values[0]
 	pos := firstValue.Key.GetToken().Position
 	return &Position{
-		Line:   pos.Line,
+		Line:   pos.Line - 1,
 		Column: pos.Column,
 	}, nil
 }
