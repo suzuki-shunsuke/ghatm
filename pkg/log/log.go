@@ -16,7 +16,7 @@ func New(version string) *logrus.Entry {
 	}
 	return logger.WithFields(logrus.Fields{
 		"version": version,
-		"program": "gha-set-timeout-minutes",
+		"program": "ghatm",
 		"env":     fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
 	})
 }

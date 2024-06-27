@@ -1,6 +1,6 @@
 ---
 version: 2
-project_name: gha-set-timeout-minutes
+project_name: ghatm
 
 archives:
   - name_template: "{{.ProjectName}}_{{.Os}}_{{.Arch}}"
@@ -9,8 +9,8 @@ archives:
         format: zip
 
 builds:
-  - binary: gha-set-timeout-minutes
-    main: cmd/gha-set-timeout-minutes/main.go
+  - binary: ghatm
+    main: cmd/ghatm/main.go
     env:
       - CGO_ENABLED=0
     goos:
@@ -24,7 +24,7 @@ builds:
 release:
   prerelease: true
   header: |
-    [Pull Requests](https://github.com/suzuki-shunsuke/gha-set-timeout-minutes/pulls?q=is%3Apr+milestone%3A{{.Tag}}) | [Issues](https://github.com/suzuki-shunsuke/gha-set-timeout-minutes/issues?q=is%3Aissue+milestone%3A{{.Tag}}) | https://github.com/suzuki-shunsuke/gha-set-timeout-minutes/compare/{{.PreviousTag}}...{{.Tag}}
+    [Pull Requests](https://github.com/suzuki-shunsuke/ghatm/pulls?q=is%3Apr+milestone%3A{{.Tag}}) | [Issues](https://github.com/suzuki-shunsuke/ghatm/issues?q=is%3Aissue+milestone%3A{{.Tag}}) | https://github.com/suzuki-shunsuke/ghatm/compare/{{.PreviousTag}}...{{.Tag}}
 
 signs:
   - cmd: cosign
@@ -51,13 +51,13 @@ brews:
     # GitHub/GitLab repository to push the formula to
     repository:
       owner: suzuki-shunsuke
-      name: homebrew-gha-set-timeout-minutes
+      name: homebrew-ghatm
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     # The project name and current git tag are used in the format string.
     commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
     # Your app's homepage.
     # Default is empty.
-    homepage: https://github.com/suzuki-shunsuke/gha-set-timeout-minutes
+    homepage: https://github.com/suzuki-shunsuke/ghatm
 
     # Template of your app's description.
     # Default is empty.
@@ -76,14 +76,14 @@ brews:
     # So you can `brew test` your formula.
     # Default is empty.
     test: |
-      system "#{bin}/gha-set-timeout-minutes --version"
+      system "#{bin}/ghatm --version"
 
     # Additional install instructions so you don't need to override `install`.
     #
     # Template: allowed
     # Since: v1.20
     extra_install: |
-      generate_completions_from_executable(bin/"gha-set-timeout-minutes", "completion", shells: [:bash, :zsh, :fish])
+      generate_completions_from_executable(bin/"ghatm", "completion", shells: [:bash, :zsh, :fish])
 
 scoops:
   -

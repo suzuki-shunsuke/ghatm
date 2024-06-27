@@ -1,4 +1,4 @@
-# gha-set-timeout-minutes
+# ghatm
 
 Set [timeout-minutes](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idtimeout-minutes) to all GitHub Actions jobs
 
@@ -9,43 +9,43 @@ Set [timeout-minutes](https://docs.github.com/en/actions/using-workflows/workflo
 - [job_timeout_minutes_is_required | lintnet-modules/ghalint](https://github.com/lintnet-modules/ghalint/tree/main/workflow/job_timeout_minutes_is_required)
 
 `timeout-minutes` should be set properly, but if you have a lot of workflows which don't set `timeout-minutes` it's so bothersome to fix all of them by hand.
-`gha-set-timeout-minutes` sets `timeout-minutes` automatically.
+`ghatm` sets `timeout-minutes` automatically.
 
 ## Install
 
-`gha-set-timeout-minutes` is a single binary written in Go.
+`ghatm` is a single binary written in Go.
 So you only need to put the executable binary into `$PATH`.
 
 ```sh
-go install github.com/suzuki-shunsuke/gha-set-timeout-minutes@latest
+go install github.com/suzuki-shunsuke/ghatm@latest
 ```
 
 ## How to use
 
-Please run `gha-set-timeout-minutes set` at the repository root directory.
+Please run `ghatm set` at the repository root directory.
 
 ```sh
-gha-set-timeout-minutes set
+ghatm set
 ```
 
-then `gha-set-timeout-minutes` checks GitHub Actions workflows `^\.github/workflows/.*\.ya?ml$` and sets `timeout-minutes: 30` to jobs which don't have `timeout-minutes`.
+then `ghatm` checks GitHub Actions workflows `^\.github/workflows/.*\.ya?ml$` and sets `timeout-minutes: 30` to jobs which don't have `timeout-minutes`.
 Jobs which have `timeout-minutes` aren't changed.
 You can specify the value of `timeout-minutes` with `-m` option.
 
 ```sh
-gha-set-timeout-minutes set -m 60
+ghatm set -m 60
 ```
 
 You can specify workflow files by positional arguments.
 
 ```sh
-gha-set-timeout-minutes set .github/workflows/test.yaml
+ghatm set .github/workflows/test.yaml
 ```
 
 ## Tips: Fix workflows by CI
 
-Using `gha-set-timeout-minutes` in CI, you can fix workflows automatically.
-When workflow files are added or changed in a pull request, you can run `gha-set-timeout-minutes` and commit and push changes to a feature branch.
+Using `ghatm` in CI, you can fix workflows automatically.
+When workflow files are added or changed in a pull request, you can run `ghatm` and commit and push changes to a feature branch.
 
 ## LICENSE
 

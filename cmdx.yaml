@@ -39,9 +39,9 @@ tasks:
       - name: target
   - name: install
     short: i
-    description: Build and install gha-set-timeout-minutes
-    usage: Build and install gha-set-timeout-minutes by "go install" command
-    script: go install ./cmd/gha-set-timeout-minutes
+    description: Build and install ghatm
+    usage: Build and install ghatm by "go install" command
+    script: go install ./cmd/ghatm
   - name: fmt
     description: Format GO codes
     usage: Format GO codes

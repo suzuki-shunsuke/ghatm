@@ -7,8 +7,8 @@ import (
 	"syscall"
 
 	"github.com/sirupsen/logrus"
-	"github.com/suzuki-shunsuke/gha-set-timeout-minutes/pkg/cli"
-	"github.com/suzuki-shunsuke/gha-set-timeout-minutes/pkg/log"
+	"github.com/suzuki-shunsuke/ghatm/pkg/cli"
+	"github.com/suzuki-shunsuke/ghatm/pkg/log"
 	"github.com/suzuki-shunsuke/logrus-error/logerr"
 )
 
@@ -21,7 +21,7 @@ var (
 func main() {
 	logE := log.New(version)
 	if err := core(logE); err != nil {
-		logerr.WithError(logE, err).Fatal("gha-set-timeout-minutes failed")
+		logerr.WithError(logE, err).Fatal("ghatm failed")
 	}
 }
 

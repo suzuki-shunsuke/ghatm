@@ -29,7 +29,7 @@ func (r *Runner) Run(ctx context.Context, args ...string) error {
 		compiledDate = time.Now()
 	}
 	app := cli.App{
-		Name:     "gha-set-timeout-minutes",
+		Name:     "ghatm",
 		Usage:    "",
 		Version:  r.LDFlags.Version + " (" + r.LDFlags.Commit + ")",
 		Compiled: compiledDate,
