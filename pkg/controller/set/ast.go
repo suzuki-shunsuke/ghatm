@@ -83,18 +83,18 @@ func parseDocValue(value *ast.MappingValueNode, jobNames map[string]struct{}) ([
 func parseJobAST(value *ast.MappingValueNode, jobNames map[string]struct{}) (*Position, error) {
 	jobNameNode, ok := value.Key.(*ast.StringNode)
 	if !ok {
-		return nil, nil
+		return nil, errors.New("job name must be a string")
 	}
 	jobName := jobNameNode.Value
 	if _, ok := jobNames[jobName]; !ok {
-		return nil, nil
+		return nil, nil //nolint:nilnil
 	}
 	fields, ok := value.Value.(*ast.MappingNode)
 	if !ok {
-		return nil, nil
+		return nil, errors.New("job value must be a *ast.MappingNode")
 	}
 	if len(fields.Values) == 0 {
-		return nil, nil
+		return nil, errors.New("job doesn't have any field")
 	}
 	firstValue := fields.Values[0]
 	pos := firstValue.Key.GetToken().Position
