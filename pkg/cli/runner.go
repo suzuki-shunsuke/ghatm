@@ -35,14 +35,12 @@ func (r *Runner) Run(ctx context.Context, args ...string) error {
 		Compiled: compiledDate,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:    "log-level",
-				Usage:   "log level",
-				EnvVars: []string{"YODOC_LOG_LEVEL"},
+				Name:  "log-level",
+				Usage: "log level",
 			},
 			&cli.StringFlag{
-				Name:    "log-color",
-				Usage:   "Log color. One of 'auto' (default), 'always', 'never'",
-				EnvVars: []string{"YODOC_LOG_COLOR"},
+				Name:  "log-color",
+				Usage: "Log color. One of 'auto' (default), 'always', 'never'",
 			},
 		},
 		EnableBashCompletion: true,

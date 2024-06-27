@@ -13,7 +13,7 @@ command_console() {
 }
 
 commands() {
-  for cmd in init run completion; do
+  for cmd in set completion; do
     echo "
 ## gha-set-timeout-minutes $cmd
 

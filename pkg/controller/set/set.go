@@ -13,10 +13,8 @@ type Param struct {
 }
 
 func (c *Controller) Set(_ context.Context, _ *logrus.Entry, param *Param) error {
-	// find and read config
 	files := param.Files
 	if len(files) == 0 {
-		// find templates
 		a, err := FindWorkflows(c.fs)
 		if err != nil {
 			return err
