@@ -1,0 +1,22 @@
+---
+linters:
+  enable-all: true
+  disable:
+    - err113
+    - gomnd # WARN The linter 'gomnd' is deprecated (since v1.58.0) due to: The linter has been renamed. Replaced by mnd. 
+    - execinquery # WARN The linter 'execinquery' is deprecated (since v1.58.0) due to: The repository of the linter has been archived by the owner.  
+    - wsl
+    - lll
+    - godot
+    - nlreturn
+    - godox
+    - tagliatelle
+    - ireturn
+    - varnamelen
+    - exhaustive
+    - exhaustruct
+    - nonamedreturns
+    - musttag
+    - depguard
+    - tagalign
+    - gomoddirectives
