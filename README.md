@@ -74,7 +74,7 @@ go install github.com/suzuki-shunsuke/ghatm/cmd/ghatm@latest
 
 ## How to use
 
-Please run `ghatm set` at the repository root directory.
+Please run `ghatm set` on the repository root directory.
 
 ```sh
 ghatm set
