@@ -25,7 +25,7 @@ $ ghatm set
 		Flags: []cli.Flag{
 			&cli.IntFlag{
 				Name:    "timeout-minutes",
-				Aliases: []string{"m"},
+				Aliases: []string{"t"},
 				Usage:   "The value of timeout-minutes",
 				Value:   30, //nolint:mnd
 			},
