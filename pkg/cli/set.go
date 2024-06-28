@@ -39,7 +39,7 @@ func (rc *setCommand) action(c *cli.Context) error {
 	logE := rc.logE
 	log.SetLevel(c.String("log-level"), logE)
 	log.SetColor(c.String("log-color"), logE)
-	return ctrl.Set(&set.Param{ //nolint:wrapcheck
+	return ctrl.Set(logE, &set.Param{ //nolint:wrapcheck
 		Files:          c.Args().Slice(),
 		TimeoutMinutes: c.Int("timeout-minutes"),
 	})
