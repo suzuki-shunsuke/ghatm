@@ -30,10 +30,10 @@ ghatm set
 
 then `ghatm` checks GitHub Actions workflows `^\.github/workflows/.*\.ya?ml$` and sets `timeout-minutes: 30` to jobs which don't have `timeout-minutes`.
 Jobs which have `timeout-minutes` aren't changed.
-You can specify the value of `timeout-minutes` with `-m` option.
+You can specify the value of `timeout-minutes` with `-t` option.
 
 ```sh
-ghatm set -m 60
+ghatm set -t 60
 ```
 
 You can specify workflow files by positional arguments.
