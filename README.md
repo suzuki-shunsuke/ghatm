@@ -43,7 +43,7 @@ aqua g -i suzuki-shunsuke/ghatm
 5. Go
 
 ```sh
-go install github.com/suzuki-shunsuke/ghatm@latest
+go install github.com/suzuki-shunsuke/ghatm/cmd/ghatm@latest
 ```
 
 ## How to use
