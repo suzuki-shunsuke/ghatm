@@ -1,6 +1,9 @@
 # ghatm
 
-Set [timeout-minutes](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idtimeout-minutes) to all GitHub Actions jobs
+Set [timeout-minutes](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idtimeout-minutes) to all GitHub Actions jobs.
+`ghatm` finds GitHub Actions workflows and add `timeout-minutes` to jobs which don't have the setting.
+
+`ghatm` edits workflow files but keeps YAML comments, indents, empty lines, and so on.
 
 ## Motivation
 
@@ -11,10 +14,33 @@ Set [timeout-minutes](https://docs.github.com/en/actions/using-workflows/workflo
 `timeout-minutes` should be set properly, but if you have a lot of workflows which don't set `timeout-minutes` it's so bothersome to fix all of them by hand.
 `ghatm` sets `timeout-minutes` automatically.
 
-## Install
+## How to install
 
 `ghatm` is a single binary written in Go.
 So you only need to put the executable binary into `$PATH`.
+
+1. [Homebrew](https://brew.sh/)
+
+```sh
+brew install suzuki-shunsuke/ghatm/ghatm
+```
+
+2. [Scoop](https://scoop.sh/)
+
+```sh
+scoop bucket add lintnet https://github.com/suzuki-shunsuke/scoop-bucket
+scoop install ghatm
+```
+
+3. [aqua](https://aquaproj.github.io/)
+
+```sh
+aqua g -i suzuki-shunsuke/ghatm
+```
+
+4. Download a prebuilt binary from [GitHub Releases](https://github.com/lintnet/lintnet/releases) and install it into `$PATH`
+
+5. Go
 
 ```sh
 go install github.com/suzuki-shunsuke/ghatm@latest
