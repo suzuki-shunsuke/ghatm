@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/spf13/afero"
-	"gopkg.in/yaml.v3"
 )
 
 func (c *Controller) handleWorkflow(file string, timeout int) error {
@@ -14,25 +13,14 @@ func (c *Controller) handleWorkflow(file string, timeout int) error {
 	if err != nil {
 		return fmt.Errorf("read a file: %w", err)
 	}
-	wf := &Workflow{}
-	if err := yaml.Unmarshal(b, wf); err != nil {
-		return fmt.Errorf("unmarshal a workflow file: %w", err)
-	}
-	jobNames := listJobsWithoutTimeout(wf.Jobs)
-	positions, err := parseWorkflowAST(b, jobNames)
+	after, err := edit(b, timeout)
 	if err != nil {
 		return err
 	}
-	if len(positions) == 0 {
+	if after == nil {
 		return nil
 	}
-
-	lines, err := insertTimeout(b, positions, timeout)
-	if err != nil {
-		return err
-	}
-
-	return c.writeWorkflow(file, lines)
+	return c.writeWorkflow(file, after)
 }
 
 func insertTimeout(content []byte, positions []*Position, timeout int) ([]string, error) {
@@ -66,13 +54,13 @@ func insertTimeout(content []byte, positions []*Position, timeout int) ([]string
 	return lines, nil
 }
 
-func (c *Controller) writeWorkflow(file string, lines []string) error {
+func (c *Controller) writeWorkflow(file string, content []byte) error {
 	stat, err := c.fs.Stat(file)
 	if err != nil {
 		return fmt.Errorf("get the workflow file stat: %w", err)
 	}
 
-	if err := afero.WriteFile(c.fs, file, []byte(strings.Join(lines, "\n")+"\n"), stat.Mode()); err != nil {
+	if err := afero.WriteFile(c.fs, file, content, stat.Mode()); err != nil {
 		return fmt.Errorf("write the workflow file: %w", err)
 	}
 	return nil
