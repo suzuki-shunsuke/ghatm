@@ -12,6 +12,9 @@ func edit(content []byte, timeout int) ([]byte, error) {
 	if err := yaml.Unmarshal(content, wf); err != nil {
 		return nil, fmt.Errorf("unmarshal a workflow file: %w", err)
 	}
+	if err := wf.Validate(); err != nil {
+		return nil, fmt.Errorf("validate a workflow: %w", err)
+	}
 	jobNames := listJobsWithoutTimeout(wf.Jobs)
 	positions, err := parseWorkflowAST(content, jobNames)
 	if err != nil {
