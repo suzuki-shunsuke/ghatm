@@ -1,56 +1,47 @@
 package set
 
 import (
-	"errors"
+	"fmt"
 
-	"github.com/sirupsen/logrus"
-	"github.com/suzuki-shunsuke/logrus-error/logerr"
+	"github.com/spf13/afero"
+	"github.com/suzuki-shunsuke/ghatm/pkg/edit"
 )
 
-type Workflow struct {
-	Jobs map[string]*Job
-}
-
-type Job struct {
-	Steps          []*Step
-	Uses           string
-	TimeoutMinutes int `yaml:"timeout-minutes"`
-}
-
-type Step struct {
-	TimeoutMinutes int `yaml:"timeout-minutes"`
-}
-
-func (w *Workflow) Validate() error {
-	if w == nil {
-		return errors.New("workflow is nil")
+func handleWorkflow(fs afero.Fs, file string, timeout int) error {
+	b, err := afero.ReadFile(fs, file)
+	if err != nil {
+		return fmt.Errorf("read a file: %w", err)
 	}
-	if len(w.Jobs) == 0 {
-		return errors.New("jobs are empty")
+	after, err := edit.Edit(b, timeout)
+	if err != nil {
+		return fmt.Errorf("create a new workflow content: %w", err)
 	}
-	for jobName, job := range w.Jobs {
-		if err := job.Validate(); err != nil {
-			return logerr.WithFields(err, logrus.Fields{"job": jobName}) //nolint:wrapcheck
-		}
+	if after == nil {
+		return nil
+	}
+	return writeWorkflow(fs, file, after)
+}
+
+func writeWorkflow(fs afero.Fs, file string, content []byte) error {
+	stat, err := fs.Stat(file)
+	if err != nil {
+		return fmt.Errorf("get the workflow file stat: %w", err)
+	}
+
+	if err := afero.WriteFile(fs, file, content, stat.Mode()); err != nil {
+		return fmt.Errorf("write the workflow file: %w", err)
 	}
 	return nil
 }
 
-func (j *Job) Validate() error {
-	if j == nil {
-		return errors.New("job is nil")
+func findWorkflows(fs afero.Fs) ([]string, error) {
+	files, err := afero.Glob(fs, ".github/workflows/*.yml")
+	if err != nil {
+		return nil, fmt.Errorf("find .github/workflows/*.yml: %w", err)
 	}
-	for _, step := range j.Steps {
-		if err := step.Validate(); err != nil {
-			return err
-		}
+	files2, err := afero.Glob(fs, ".github/workflows/*.yaml")
+	if err != nil {
+		return nil, fmt.Errorf("find .github/workflows/*.yaml: %w", err)
 	}
-	return nil
-}
-
-func (s *Step) Validate() error {
-	if s == nil {
-		return errors.New("step is nil")
-	}
-	return nil
+	return append(files, files2...), nil
 }

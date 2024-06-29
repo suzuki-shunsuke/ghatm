@@ -1,4 +1,4 @@
-package set
+package edit
 
 import (
 	"errors"
