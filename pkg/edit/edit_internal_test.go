@@ -1,4 +1,4 @@
-package set
+package edit
 
 import (
 	"os"
@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func Test_edit(t *testing.T) { //nolint:gocognit,cyclop,funlen
+func TestEdit(t *testing.T) { //nolint:gocognit,cyclop,funlen
 	t.Parallel()
 	data := []struct {
 		name    string
@@ -56,7 +56,7 @@ func Test_edit(t *testing.T) { //nolint:gocognit,cyclop,funlen
 				}
 				expResult = content
 			}
-			result, err := edit(content, 30)
+			result, err := Edit(content, 30)
 			if err != nil {
 				if d.isErr {
 					return
