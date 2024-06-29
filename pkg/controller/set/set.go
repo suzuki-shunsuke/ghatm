@@ -2,6 +2,7 @@ package set
 
 import (
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/logrus-error/logerr"
 )
 
@@ -10,10 +11,10 @@ type Param struct {
 	TimeoutMinutes int
 }
 
-func (c *Controller) Set(param *Param) error {
+func Set(fs afero.Fs, param *Param) error {
 	files := param.Files
 	if len(files) == 0 {
-		a, err := findWorkflows(c.fs)
+		a, err := findWorkflows(fs)
 		if err != nil {
 			return err
 		}
@@ -21,7 +22,7 @@ func (c *Controller) Set(param *Param) error {
 	}
 
 	for _, file := range files {
-		if err := c.handleWorkflow(file, param.TimeoutMinutes); err != nil {
+		if err := handleWorkflow(fs, file, param.TimeoutMinutes); err != nil {
 			return logerr.WithFields(err, logrus.Fields{ //nolint:wrapcheck
 				"file": file,
 			})

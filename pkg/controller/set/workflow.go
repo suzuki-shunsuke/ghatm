@@ -7,8 +7,8 @@ import (
 	"github.com/suzuki-shunsuke/ghatm/pkg/edit"
 )
 
-func (c *Controller) handleWorkflow(file string, timeout int) error {
-	b, err := afero.ReadFile(c.fs, file)
+func handleWorkflow(fs afero.Fs, file string, timeout int) error {
+	b, err := afero.ReadFile(fs, file)
 	if err != nil {
 		return fmt.Errorf("read a file: %w", err)
 	}
@@ -19,16 +19,16 @@ func (c *Controller) handleWorkflow(file string, timeout int) error {
 	if after == nil {
 		return nil
 	}
-	return c.writeWorkflow(file, after)
+	return writeWorkflow(fs, file, after)
 }
 
-func (c *Controller) writeWorkflow(file string, content []byte) error {
-	stat, err := c.fs.Stat(file)
+func writeWorkflow(fs afero.Fs, file string, content []byte) error {
+	stat, err := fs.Stat(file)
 	if err != nil {
 		return fmt.Errorf("get the workflow file stat: %w", err)
 	}
 
-	if err := afero.WriteFile(c.fs, file, content, stat.Mode()); err != nil {
+	if err := afero.WriteFile(fs, file, content, stat.Mode()); err != nil {
 		return fmt.Errorf("write the workflow file: %w", err)
 	}
 	return nil
