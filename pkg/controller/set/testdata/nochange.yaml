@@ -1,0 +1,18 @@
+---
+name: before
+on: pull_request
+jobs:
+  actionlint:
+    uses: suzuki-shunsuke/actionlint-workflow/.github/workflows/actionlint.yaml@813a6d08c08cfd7a08618a89a59bfe78e573597c # v1.0.1
+
+  foo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v2
+
+  bar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/cache@v2
+        timeout-minutes: 5

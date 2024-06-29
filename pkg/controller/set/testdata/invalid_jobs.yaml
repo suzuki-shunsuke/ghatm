@@ -1,0 +1,5 @@
+---
+name: before
+on: pull_request
+jobs:
+  foo: null

@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func Test_edit(t *testing.T) { //nolint:gocognit,cyclop
+func Test_edit(t *testing.T) { //nolint:gocognit,cyclop,funlen
 	t.Parallel()
 	data := []struct {
 		name    string
@@ -20,6 +20,25 @@ func Test_edit(t *testing.T) { //nolint:gocognit,cyclop
 			name:    "normal",
 			content: "normal.yaml",
 			result:  "normal_result.yaml",
+		},
+		{
+			name:    "nochange",
+			content: "nochange.yaml",
+		},
+		{
+			name:    "unmarshal error",
+			content: "unmarshal_error.yaml",
+			isErr:   true,
+		},
+		{
+			name:    "jobs not found",
+			content: "jobs_not_found.yaml",
+			isErr:   true,
+		},
+		{
+			name:    "jobs must be map",
+			content: "invalid_jobs.yaml",
+			isErr:   true,
 		},
 	}
 	for _, d := range data {
