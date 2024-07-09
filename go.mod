@@ -4,7 +4,7 @@ go 1.22.4
 
 require (
 	github.com/goccy/go-yaml v1.11.3
-	github.com/google/go-cmp v0.5.9
+	github.com/google/go-cmp v0.6.0
 	github.com/mattn/go-colorable v0.1.13
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/afero v1.11.0
