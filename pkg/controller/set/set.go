@@ -18,7 +18,7 @@ type Param struct {
 	Size           int
 }
 
-func Set(ctx context.Context, fs afero.Fs, param *Param) error {
+func Set(ctx context.Context, logE *logrus.Entry, fs afero.Fs, param *Param) error {
 	files := param.Files
 	if len(files) == 0 {
 		a, err := findWorkflows(fs)
@@ -34,7 +34,7 @@ func Set(ctx context.Context, fs afero.Fs, param *Param) error {
 	}
 
 	for _, file := range files {
-		if err := handleWorkflow(ctx, fs, gh, file, param); err != nil {
+		if err := handleWorkflow(ctx, logE, fs, gh, file, param); err != nil {
 			return logerr.WithFields(err, logrus.Fields{ //nolint:wrapcheck
 				"file": file,
 			})

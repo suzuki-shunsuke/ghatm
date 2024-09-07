@@ -97,7 +97,7 @@ func getJobsByAPI(ctx context.Context, gh GitHub, param *Param, file string, wf 
 	}
 
 	jobDurationMap := make(map[string][]time.Duration, len(wf.Jobs))
-	for jobName := range wf.Jobs {
+	for jobName := range jobKeys {
 		jobDurationMap[jobName] = []time.Duration{}
 	}
 
@@ -137,7 +137,8 @@ func isCompleted(jobDurationMap map[string][]time.Duration, size int) bool {
 
 // estimateTimeout estimates each job's timeout-minutes.
 // It returns a map of job key and timeout-minutes.
-func estimateTimeout(ctx context.Context, gh GitHub, param *Param, file string, wf *edit.Workflow, jobKeys map[string]struct{}) (map[string]int, error) {
+// If there is no job's duration, the job is excluded from the return value.
+func estimateTimeout(ctx context.Context, logE *logrus.Entry, gh GitHub, param *Param, file string, wf *edit.Workflow, jobKeys map[string]struct{}) (map[string]int, error) {
 	fileName := filepath.Base(file)
 	jobs, err := getJobsByAPI(ctx, gh, param, fileName, wf, jobKeys)
 	if err != nil {
@@ -147,6 +148,10 @@ func estimateTimeout(ctx context.Context, gh GitHub, param *Param, file string, 
 	// Each job's timeout-minutes is `max(durations) + 10`.
 	m := make(map[string]int, len(jobs))
 	for jobKey, durations := range jobs {
+		if len(durations) == 0 {
+			logE.WithField("job_key", jobKey).Warn("the job is ignored because the job wasn't executed")
+			continue
+		}
 		maxDuration := slices.Max(durations)
 		m[jobKey] = int(math.Ceil(maxDuration.Minutes())) + 10 //nolint:mnd
 	}

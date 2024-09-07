@@ -77,5 +77,5 @@ func (rc *setCommand) action(c *cli.Context) error {
 		param.RepoOwner = owner
 		param.RepoName = repoName
 	}
-	return set.Set(c.Context, fs, param) //nolint:wrapcheck
+	return set.Set(c.Context, rc.logE, fs, param) //nolint:wrapcheck
 }
