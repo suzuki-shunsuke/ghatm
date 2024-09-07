@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -64,6 +65,9 @@ func (rc *setCommand) action(c *cli.Context) error {
 		TimeoutMinutes: c.Int("timeout-minutes"),
 		Auto:           c.Bool("auto"),
 		Size:           c.Int("size"),
+	}
+	if param.Auto && repo == "" {
+		return errors.New("the flag -auto requires the flag -repo")
 	}
 	if repo != "" {
 		owner, repoName, ok := strings.Cut(repo, "/")
