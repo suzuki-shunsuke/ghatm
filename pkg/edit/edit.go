@@ -4,19 +4,10 @@ import (
 	"bufio"
 	"fmt"
 	"strings"
-
-	"gopkg.in/yaml.v3"
 )
 
-func Edit(content []byte, timeout int) ([]byte, error) {
-	wf := &Workflow{}
-	if err := yaml.Unmarshal(content, wf); err != nil {
-		return nil, fmt.Errorf("unmarshal a workflow file: %w", err)
-	}
-	if err := wf.Validate(); err != nil {
-		return nil, fmt.Errorf("validate a workflow: %w", err)
-	}
-	jobNames := listJobsWithoutTimeout(wf.Jobs)
+func Edit(content []byte, wf *Workflow, timeouts map[string]int, timeout int) ([]byte, error) {
+	jobNames := ListJobsWithoutTimeout(wf.Jobs)
 	positions, err := parseWorkflowAST(content, jobNames)
 	if err != nil {
 		return nil, err
@@ -25,14 +16,14 @@ func Edit(content []byte, timeout int) ([]byte, error) {
 		return nil, nil
 	}
 
-	lines, err := insertTimeout(content, positions, timeout)
+	lines, err := insertTimeout(content, positions, timeouts, timeout)
 	if err != nil {
 		return nil, err
 	}
 	return []byte(strings.Join(lines, "\n") + "\n"), nil
 }
 
-func listJobsWithoutTimeout(jobs map[string]*Job) map[string]struct{} {
+func ListJobsWithoutTimeout(jobs map[string]*Job) map[string]struct{} {
 	m := make(map[string]struct{}, len(jobs))
 	for jobName, job := range jobs {
 		if hasTimeout(job) {
@@ -55,7 +46,17 @@ func hasTimeout(job *Job) bool {
 	return true
 }
 
-func insertTimeout(content []byte, positions []*Position, timeout int) ([]string, error) {
+func getTimeout(timeouts map[string]int, timeout int, jobKey string) int {
+	if timeouts == nil {
+		return timeout
+	}
+	if a, ok := timeouts[jobKey]; ok {
+		return a
+	}
+	return -1
+}
+
+func insertTimeout(content []byte, positions []*Position, timeouts map[string]int, timeout int) ([]string, error) {
 	reader := strings.NewReader(string(content))
 	scanner := bufio.NewScanner(reader)
 	num := -1
@@ -69,7 +70,9 @@ func insertTimeout(content []byte, positions []*Position, timeout int) ([]string
 		line := scanner.Text()
 		if pos.Line == num {
 			indent := strings.Repeat(" ", pos.Column-1)
-			lines = append(lines, indent+fmt.Sprintf("timeout-minutes: %d", timeout))
+			if t := getTimeout(timeouts, timeout, pos.JobKey); t != -1 {
+				lines = append(lines, indent+fmt.Sprintf("timeout-minutes: %d", t))
+			}
 			if posIndex == lastPosIndex {
 				pos.Line = -1
 			} else {

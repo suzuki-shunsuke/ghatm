@@ -11,34 +11,71 @@ import (
 func TestEdit(t *testing.T) { //nolint:gocognit,cyclop,funlen
 	t.Parallel()
 	data := []struct {
-		name    string
-		content string
-		result  string
-		isErr   bool
+		name     string
+		content  string
+		result   string
+		isErr    bool
+		wf       *Workflow
+		timeouts map[string]int
 	}{
 		{
 			name:    "normal",
 			content: "normal.yaml",
 			result:  "normal_result.yaml",
+			wf: &Workflow{
+				Jobs: map[string]*Job{
+					"actionlint": {
+						Uses: "suzuki-shunsuke/actionlint-workflow/.github/workflows/actionlint.yaml@813a6d08c08cfd7a08618a89a59bfe78e573597c # v1.0.1",
+					},
+					"foo": {
+						TimeoutMinutes: 5,
+						Steps: []*Step{
+							{},
+						},
+					},
+					"bar": {
+						Steps: []*Step{
+							{
+								TimeoutMinutes: 5,
+							},
+						},
+					},
+					"zoo": {
+						Steps: []*Step{
+							{},
+						},
+					},
+					"yoo": {
+						Steps: []*Step{
+							{},
+						},
+					},
+				},
+			},
 		},
 		{
 			name:    "nochange",
 			content: "nochange.yaml",
-		},
-		{
-			name:    "unmarshal error",
-			content: "unmarshal_error.yaml",
-			isErr:   true,
-		},
-		{
-			name:    "jobs not found",
-			content: "jobs_not_found.yaml",
-			isErr:   true,
-		},
-		{
-			name:    "jobs must be map",
-			content: "invalid_jobs.yaml",
-			isErr:   true,
+			wf: &Workflow{
+				Jobs: map[string]*Job{
+					"actionlint": {
+						Uses: "suzuki-shunsuke/actionlint-workflow/.github/workflows/actionlint.yaml@813a6d08c08cfd7a08618a89a59bfe78e573597c # v1.0.1",
+					},
+					"foo": {
+						TimeoutMinutes: 5,
+						Steps: []*Step{
+							{},
+						},
+					},
+					"bar": {
+						Steps: []*Step{
+							{
+								TimeoutMinutes: 5,
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 	for _, d := range data {
@@ -56,7 +93,7 @@ func TestEdit(t *testing.T) { //nolint:gocognit,cyclop,funlen
 				}
 				expResult = content
 			}
-			result, err := Edit(content, 30)
+			result, err := Edit(content, d.wf, d.timeouts, 30)
 			if err != nil {
 				if d.isErr {
 					return
