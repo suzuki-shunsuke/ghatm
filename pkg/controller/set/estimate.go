@@ -97,6 +97,9 @@ func getJobsByAPI(ctx context.Context, gh GitHub, param *Param, file string, wf 
 	}
 
 	jobDurationMap := make(map[string][]time.Duration, len(wf.Jobs))
+	for jobName := range wf.Jobs {
+		jobDurationMap[jobName] = []time.Duration{}
+	}
 
 	runOpts := &github.ListWorkflowRunsOptions{
 		Status: "success",
