@@ -43,6 +43,12 @@ $ ghatm set
 				Usage:   "GitHub Repository",
 				EnvVars: []string{"GITHUB_REPOSITORY"},
 			},
+			&cli.IntFlag{
+				Name:    "size",
+				Aliases: []string{"s"},
+				Usage:   "Data size",
+				Value:   30, //nolint:mnd
+			},
 		},
 	}
 }
@@ -57,6 +63,7 @@ func (rc *setCommand) action(c *cli.Context) error {
 		Files:          c.Args().Slice(),
 		TimeoutMinutes: c.Int("timeout-minutes"),
 		Auto:           c.Bool("auto"),
+		Size:           c.Int("size"),
 	}
 	if repo != "" {
 		owner, repoName, ok := strings.Cut(repo, "/")

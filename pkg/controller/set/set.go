@@ -28,7 +28,10 @@ func Set(ctx context.Context, fs afero.Fs, param *Param) error {
 		files = a
 	}
 
-	gh := github.NewClient(ctx)
+	var gh *github.Client
+	if param.Auto {
+		gh = github.NewClient(ctx)
+	}
 
 	for _, file := range files {
 		if err := handleWorkflow(ctx, fs, gh, file, param); err != nil {

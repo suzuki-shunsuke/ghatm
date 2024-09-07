@@ -87,6 +87,8 @@ func handleWorkflowRun(ctx context.Context, gh GitHub, param *Param, jobDuration
 	return true, nil
 }
 
+// getJobsByAPI gets each job's durations by the GitHub API.
+// It returns a map of job key and durations.
 func getJobsByAPI(ctx context.Context, gh GitHub, param *Param, file string, wf *edit.Workflow, jobKeys map[string]struct{}) (map[string][]time.Duration, error) {
 	staticNames := make(map[string]struct{}, len(wf.Jobs))
 	namePatterns := make(map[string]*regexp.Regexp, len(wf.Jobs))
@@ -130,12 +132,16 @@ func isCompleted(jobDurationMap map[string][]time.Duration, size int) bool {
 	return true
 }
 
+// estimateTimeout estimates each job's timeout-minutes.
+// It returns a map of job key and timeout-minutes.
 func estimateTimeout(ctx context.Context, gh GitHub, param *Param, file string, wf *edit.Workflow, jobKeys map[string]struct{}) (map[string]int, error) {
 	fileName := filepath.Base(file)
 	jobs, err := getJobsByAPI(ctx, gh, param, fileName, wf, jobKeys)
 	if err != nil {
 		return nil, err
 	}
+
+	// Each job's timeout-minutes is `max(durations) + 10`.
 	m := make(map[string]int, len(jobs))
 	for jobKey, durations := range jobs {
 		maxDuration := slices.Max(durations)
