@@ -80,8 +80,8 @@ Please run `ghatm set` on the repository root directory.
 ghatm set
 ```
 
-then `ghatm` checks GitHub Actions workflows `^\.github/workflows/.*\.ya?ml$` and sets `timeout-minutes: 30` to jobs which don't have `timeout-minutes`.
-Jobs which have `timeout-minutes` aren't changed.
+Then `ghatm` checks GitHub Actions workflows `^\.github/workflows/.*\.ya?ml$` and sets `timeout-minutes: 30` to jobs not having `timeout-minutes`.
+Jobs with `timeout-minutes` aren't changed.
 You can specify the value of `timeout-minutes` with `-t` option.
 
 ```sh
@@ -92,6 +92,33 @@ You can specify workflow files by positional arguments.
 
 ```sh
 ghatm set .github/workflows/test.yaml
+```
+
+### Decide `timeout-minutes` based on each job's past execution times
+
+```sh
+ghatm set -auto [-repo <repository>] [-size <the number of sample data>]
+```
+
+ghatm >= v0.3.2 [#68](https://github.com/suzuki-shunsuke/ghatm/issues/68) [#70](https://github.com/suzuki-shunsuke/ghatm/pull/70)
+
+> [!warning]
+> The feature doesn't support workflows using `workflow_call`.
+
+If the `-auto` option is used, ghatm calls GitHub API to get each job's past execution times and decide appropriate `timeout-minutes`.
+This feature requires a GitHub access token with the `actions:read` permission.
+You have to set the access token to the environment variable `GITHUB_TOKEN` or `GHATM_GITHUB_TOKEN`.
+
+GitHub API:
+
+- [List workflow runs for a workflow](https://docs.github.com/en/rest/actions/workflow-runs?apiVersion=2022-11-28#list-workflow-runs-for-a-workflow)
+- [List jobs for a workflow run](https://docs.github.com/en/rest/actions/workflow-jobs#list-jobs-for-a-workflow-run)
+
+ghatm takes 30 jobs by job to decide `timeout-minutes`.
+You can change the number of jobs by the `-size` option.
+
+```
+max(job execution times) + 10
 ```
 
 ## Tips: Fix workflows by CI
