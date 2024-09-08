@@ -12,7 +12,7 @@ require (
 	github.com/suzuki-shunsuke/logrus-error v0.1.4
 	github.com/urfave/cli/v2 v2.27.4
 	golang.org/x/exp v0.0.0-20240904232852-e7e105dedf7e
-	golang.org/x/oauth2 v0.15.0
+	golang.org/x/oauth2 v0.23.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
