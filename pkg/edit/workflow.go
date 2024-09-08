@@ -2,6 +2,9 @@ package edit
 
 import (
 	"errors"
+	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/logrus-error/logerr"
@@ -12,6 +15,7 @@ type Workflow struct {
 }
 
 type Job struct {
+	Name           string
 	Steps          []*Step
 	Uses           string
 	TimeoutMinutes int `yaml:"timeout-minutes"`
@@ -19,6 +23,24 @@ type Job struct {
 
 type Step struct {
 	TimeoutMinutes int `yaml:"timeout-minutes"`
+}
+
+// foo (${{inputs.name}}) -> ^foo (.+?)$
+
+var parameterRegexp = regexp.MustCompile(`\${{.+?}}`)
+
+func (j *Job) GetName(k string) (string, *regexp.Regexp, error) {
+	if j.Name == "" {
+		return k, nil, nil
+	}
+	if !strings.Contains(j.Name, "${{") {
+		return j.Name, nil, nil
+	}
+	r, err := regexp.Compile("^" + parameterRegexp.ReplaceAllLiteralString(j.Name, ".+") + "$")
+	if err != nil {
+		return "", nil, fmt.Errorf("convert a job name with parameters to a regular expression: %w", err)
+	}
+	return j.Name, r, nil
 }
 
 func (w *Workflow) Validate() error {

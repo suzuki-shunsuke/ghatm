@@ -1,18 +1,47 @@
 package set
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghatm/pkg/edit"
+	"github.com/suzuki-shunsuke/ghatm/pkg/github"
+	"gopkg.in/yaml.v3"
 )
 
-func handleWorkflow(fs afero.Fs, file string, timeout int) error {
-	b, err := afero.ReadFile(fs, file)
+type GitHub interface {
+	ListWorkflowRuns(ctx context.Context, owner, repo, workflowFileName string, opts *github.ListWorkflowRunsOptions) ([]*github.WorkflowRun, *github.Response, error)
+	ListWorkflowJobs(ctx context.Context, owner, repo string, runID int64, opts *github.ListWorkflowJobsOptions) ([]*github.WorkflowJob, *github.Response, error)
+}
+
+func handleWorkflow(ctx context.Context, logE *logrus.Entry, fs afero.Fs, gh GitHub, file string, param *Param) error {
+	content, err := afero.ReadFile(fs, file)
 	if err != nil {
 		return fmt.Errorf("read a file: %w", err)
 	}
-	after, err := edit.Edit(b, timeout)
+
+	wf := &edit.Workflow{}
+	if err := yaml.Unmarshal(content, wf); err != nil {
+		return fmt.Errorf("unmarshal a workflow file: %w", err)
+	}
+	if err := wf.Validate(); err != nil {
+		return fmt.Errorf("validate a workflow: %w", err)
+	}
+
+	jobNames := edit.ListJobsWithoutTimeout(wf.Jobs)
+
+	var timeouts map[string]int
+	if param.Auto {
+		tm, err := estimateTimeout(ctx, logE, gh, param, file, wf, jobNames)
+		if err != nil {
+			return err
+		}
+		timeouts = tm
+	}
+
+	after, err := edit.Edit(content, wf, timeouts, param.TimeoutMinutes)
 	if err != nil {
 		return fmt.Errorf("create a new workflow content: %w", err)
 	}

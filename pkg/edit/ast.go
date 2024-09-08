@@ -11,6 +11,7 @@ import (
 )
 
 type Position struct {
+	JobKey string
 	Line   int
 	Column int
 }
@@ -115,6 +116,7 @@ func parseJobAST(value *ast.MappingValueNode, jobNames map[string]struct{}) (*Po
 	firstValue := fields[0]
 	pos := firstValue.Key.GetToken().Position
 	return &Position{
+		JobKey: jobName,
 		Line:   pos.Line - 1,
 		Column: pos.Column,
 	}, nil
