@@ -31,4 +31,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{github.token}}
       - run: |
-          ! git diff .github/workflows/test.yaml
+          ! git diff --exit-code .github/workflows/test.yaml
