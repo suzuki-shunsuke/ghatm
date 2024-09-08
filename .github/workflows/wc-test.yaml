@@ -30,4 +30,5 @@ jobs:
       - run: go run ./cmd/ghatm set -auto
         env:
           GITHUB_TOKEN: ${{github.token}}
-      - run: ! git diff .github/workflows/test.yaml
+      - run: |
+          ! git diff .github/workflows/test.yaml
