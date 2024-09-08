@@ -27,3 +27,8 @@ jobs:
       - run: go test -v ./... -race -covermode=atomic
       - run: go run ./cmd/ghatm set testdata/before.yaml
       - run: diff testdata/before.yaml testdata/after.yaml
+      - run: go run ./cmd/ghatm set -auto
+        env:
+          GITHUB_TOKEN: ${{github.token}}
+      - run: |
+          ! git diff --exit-code .github/workflows/test.yaml
