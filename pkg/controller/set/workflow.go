@@ -13,7 +13,7 @@ import (
 
 type GitHub interface {
 	ListWorkflowRuns(ctx context.Context, owner, repo, workflowFileName string, opts *github.ListWorkflowRunsOptions) ([]*github.WorkflowRun, *github.Response, error)
-	ListWorkflowJobs(ctx context.Context, owner, repo string, runID int64, opts *github.ListWorkflowJobsOptions) ([]*github.WorkflowJob, *github.Response, error)
+	ListWorkflowJobs(ctx context.Context, logE *logrus.Entry, owner, repo string, runID int64, opts *github.ListWorkflowJobsOptions) ([]*github.WorkflowJob, *github.Response, error)
 }
 
 func handleWorkflow(ctx context.Context, logE *logrus.Entry, fs afero.Fs, gh GitHub, file string, param *Param) error {

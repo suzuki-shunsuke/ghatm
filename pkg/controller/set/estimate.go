@@ -6,16 +6,18 @@ import (
 	"math"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghatm/pkg/edit"
 	"github.com/suzuki-shunsuke/ghatm/pkg/github"
 	"github.com/suzuki-shunsuke/logrus-error/logerr"
+	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )
 
-func setNamePatterns(jobs map[string]*edit.Job, jobKeys map[string]struct{}, staticNames map[string]struct{}, namePatterns map[string]*regexp.Regexp) error {
+func setNamePatterns(jobs map[string]*edit.Job, jobKeys map[string]struct{}, staticNames map[string]string, namePatterns map[string]*regexp.Regexp) error {
 	for jobKey, job := range jobs {
 		if _, ok := jobKeys[jobKey]; !ok {
 			continue
@@ -27,90 +29,118 @@ func setNamePatterns(jobs map[string]*edit.Job, jobKeys map[string]struct{}, sta
 			}))
 		}
 		if nameRegexp == nil {
-			staticNames[name] = struct{}{}
+			staticNames[name] = jobKey
 			continue
 		}
-		namePatterns[name] = nameRegexp
+		namePatterns[jobKey] = nameRegexp
 	}
 	return nil
 }
 
-func handleJob(jobDurationMap map[string][]time.Duration, staticNames map[string]struct{}, namePatterns map[string]*regexp.Regexp, job *github.WorkflowJob) {
-	if _, ok := staticNames[job.Name]; ok {
-		a, ok := jobDurationMap[job.Name]
+func handleJob(logE *logrus.Entry, jobDurationMap map[string][]time.Duration, staticNames map[string]string, namePatterns map[string]*regexp.Regexp, job *github.WorkflowJob) {
+	if jobKey, ok := staticNames[job.Name]; ok {
+		logE.WithFields(logrus.Fields{
+			"job_name": job.Name,
+			"job_key":  jobKey,
+		}).Debug("adding the job duration")
+		a, ok := jobDurationMap[jobKey]
 		if !ok {
 			a = []time.Duration{}
 		}
 		a = append(a, job.Duration)
-		jobDurationMap[job.Name] = a
+		jobDurationMap[jobKey] = a
 		return
 	}
-	for name, nameRegexp := range namePatterns {
+	for jobKey, nameRegexp := range namePatterns {
 		if !nameRegexp.MatchString(job.Name) {
 			continue
 		}
-		a, ok := jobDurationMap[name]
+		logE.WithFields(logrus.Fields{
+			"job_name":         job.Name,
+			"job_key":          jobKey,
+			"job_name_pattern": nameRegexp.String(),
+		}).Debug("adding the job duration")
+		a, ok := jobDurationMap[jobKey]
 		if !ok {
 			a = []time.Duration{}
 		}
 		a = append(a, job.Duration)
-		jobDurationMap[name] = a
+		jobDurationMap[jobKey] = a
 		return
 	}
+	logE.WithFields(logrus.Fields{
+		"job_name": job.Name,
+	}).Debug("the job name doesn't match")
 }
 
-func handleWorkflowRun(ctx context.Context, gh GitHub, param *Param, jobDurationMap map[string][]time.Duration, staticNames map[string]struct{}, namePatterns map[string]*regexp.Regexp, runID int64) (bool, error) {
+func handleWorkflowRun(ctx context.Context, logE *logrus.Entry, gh GitHub, param *Param, jobDurationMap map[string][]time.Duration, staticNames map[string]string, namePatterns map[string]*regexp.Regexp, runID int64) (bool, error) {
 	jobOpts := &github.ListWorkflowJobsOptions{
 		Status: "success",
 	}
 	for range 10 {
-		if isCompleted(jobDurationMap, param.Size) {
+		if isCompleted(logE, jobDurationMap, param.Size) {
 			return true, nil
 		}
-		jobs, resp, err := gh.ListWorkflowJobs(ctx, param.RepoOwner, param.RepoName, runID, jobOpts)
+		jobs, resp, err := gh.ListWorkflowJobs(ctx, logE, param.RepoOwner, param.RepoName, runID, jobOpts)
 		if err != nil {
 			return false, fmt.Errorf("list workflow jobs: %w", logerr.WithFields(err, logrus.Fields{
 				"workflow_run_id": runID,
 			}))
 		}
+		logE.WithField("num_of_jobs", len(jobs)).Debug("list workflow jobs")
 		for _, job := range jobs {
-			if isCompleted(jobDurationMap, param.Size) {
+			logE := logE.WithFields(logrus.Fields{
+				"job_name":     job.Name,
+				"job_status":   job.Status,
+				"job_duration": job.Duration,
+			})
+			if isCompleted(logE, jobDurationMap, param.Size) {
+				logE.Debug("job has been completed")
 				return true, nil
 			}
-			handleJob(jobDurationMap, staticNames, namePatterns, job)
+			logE.Debug("handling the job")
+			handleJob(logE, jobDurationMap, staticNames, namePatterns, job)
 		}
 		if resp.NextPage == 0 {
 			break
 		}
 		jobOpts.Page = resp.NextPage
 	}
-	return true, nil
+	return false, nil
 }
 
 // getJobsByAPI gets each job's durations by the GitHub API.
 // It returns a map of job key and durations.
-func getJobsByAPI(ctx context.Context, gh GitHub, param *Param, file string, wf *edit.Workflow, jobKeys map[string]struct{}) (map[string][]time.Duration, error) {
-	staticNames := make(map[string]struct{}, len(wf.Jobs))
+func getJobsByAPI(ctx context.Context, logE *logrus.Entry, gh GitHub, param *Param, file string, wf *edit.Workflow, jobKeys map[string]struct{}) (map[string][]time.Duration, error) {
+	// jobName -> jobKey
+	staticNames := make(map[string]string, len(wf.Jobs))
+	// jobKey -> regular expression of job name
 	namePatterns := make(map[string]*regexp.Regexp, len(wf.Jobs))
 	if err := setNamePatterns(wf.Jobs, jobKeys, staticNames, namePatterns); err != nil {
 		return nil, err
 	}
+	logE.WithFields(logrus.Fields{
+		"static_names":  strings.Join(maps.Keys(staticNames), ", "),
+		"name_patterns": strings.Join(maps.Keys(namePatterns), ", "),
+	}).Debug("static names and name patterns")
 
 	jobDurationMap := make(map[string][]time.Duration, len(wf.Jobs))
-	for jobName := range jobKeys {
-		jobDurationMap[jobName] = []time.Duration{}
+	for jobKey := range jobKeys {
+		jobDurationMap[jobKey] = []time.Duration{}
 	}
 
 	runOpts := &github.ListWorkflowRunsOptions{
 		Status: "success",
 	}
-	for range 10 {
+	loopSize := int(math.Ceil(float64(param.Size) * 3.0 / 100)) //nolint:mnd
+	for range loopSize {
 		runs, resp, err := gh.ListWorkflowRuns(ctx, param.RepoOwner, param.RepoName, file, runOpts)
 		if err != nil {
 			return nil, fmt.Errorf("list workflow runs: %w", err)
 		}
+		logE.WithField("num_of_runs", len(runs)).Debug("list workflow runs")
 		for _, run := range runs {
-			completed, err := handleWorkflowRun(ctx, gh, param, jobDurationMap, staticNames, namePatterns, run.ID)
+			completed, err := handleWorkflowRun(ctx, logE, gh, param, jobDurationMap, staticNames, namePatterns, run.ID)
 			if err != nil {
 				return nil, err
 			}
@@ -126,9 +156,14 @@ func getJobsByAPI(ctx context.Context, gh GitHub, param *Param, file string, wf 
 	return jobDurationMap, nil
 }
 
-func isCompleted(jobDurationMap map[string][]time.Duration, size int) bool {
-	for _, durations := range jobDurationMap {
+func isCompleted(logE *logrus.Entry, jobDurationMap map[string][]time.Duration, size int) bool {
+	for jobKey, durations := range jobDurationMap {
 		if len(durations) < size {
+			logE.WithFields(logrus.Fields{
+				"job_key":          jobKey,
+				"param_size":       size,
+				"num_of_durations": len(durations),
+			}).Debug("the job hasn't been completed")
 			return false
 		}
 	}
@@ -140,7 +175,7 @@ func isCompleted(jobDurationMap map[string][]time.Duration, size int) bool {
 // If there is no job's duration, the job is excluded from the return value.
 func estimateTimeout(ctx context.Context, logE *logrus.Entry, gh GitHub, param *Param, file string, wf *edit.Workflow, jobKeys map[string]struct{}) (map[string]int, error) {
 	fileName := filepath.Base(file)
-	jobs, err := getJobsByAPI(ctx, gh, param, fileName, wf, jobKeys)
+	jobs, err := getJobsByAPI(ctx, logE, gh, param, fileName, wf, jobKeys)
 	if err != nil {
 		return nil, err
 	}

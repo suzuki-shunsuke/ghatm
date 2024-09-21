@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/go-github/v65/github"
+	"github.com/sirupsen/logrus"
 )
 
 type ListWorkflowJobsOptions struct {
@@ -16,12 +17,16 @@ type ListWorkflowJobsOptions struct {
 type WorkflowJob struct {
 	ID   int64
 	Name string
-	// Can be one of: completed, action_required, cancelled, failure, neutral, skipped, stale, success, timed_out, in_progress, queued, requested, waiting, pending
-	Status   string
-	Duration time.Duration
+	// The phase of the lifecycle that the job is currently in.
+	// "queued", "in_progress", "completed", "waiting", "requested", "pending"
+	Status string
+	// The outcome of the job.
+	// "success", "failure", "neutral", "cancelled", "skipped", "timed_out", "action_required",
+	Conclusion string
+	Duration   time.Duration
 }
 
-func (c *Client) ListWorkflowJobs(ctx context.Context, owner, repo string, runID int64, opts *ListWorkflowJobsOptions) ([]*WorkflowJob, *github.Response, error) {
+func (c *Client) ListWorkflowJobs(ctx context.Context, logE *logrus.Entry, owner, repo string, runID int64, opts *ListWorkflowJobsOptions) ([]*WorkflowJob, *github.Response, error) {
 	o := &github.ListWorkflowJobsOptions{
 		ListOptions: github.ListOptions{
 			PerPage: 100, //nolint:mnd
@@ -39,12 +44,21 @@ func (c *Client) ListWorkflowJobs(ctx context.Context, owner, repo string, runID
 		if started == nil {
 			continue
 		}
-		ret = append(ret, &WorkflowJob{
-			ID:       job.GetID(),
-			Name:     job.GetName(),
-			Status:   job.GetStatus(),
-			Duration: job.GetCompletedAt().Sub(*started),
-		})
+		j := &WorkflowJob{
+			ID:         job.GetID(),
+			Name:       job.GetName(),
+			Status:     job.GetStatus(),
+			Conclusion: job.GetConclusion(),
+			Duration:   job.GetCompletedAt().Sub(*started),
+		}
+		if j.Status != "completed" || j.Conclusion != "success" {
+			logE.WithFields(logrus.Fields{
+				"status":     j.Status,
+				"conclusion": j.Conclusion,
+			}).Debug("skip the job")
+			continue
+		}
+		ret = append(ret, j)
 	}
 	return ret, resp, nil
 }

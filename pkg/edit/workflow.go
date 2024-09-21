@@ -19,6 +19,7 @@ type Job struct {
 	Steps          []*Step
 	Uses           string
 	TimeoutMinutes int `yaml:"timeout-minutes"`
+	Strategy       any
 }
 
 type Step struct {
@@ -30,11 +31,32 @@ type Step struct {
 var parameterRegexp = regexp.MustCompile(`\${{.+?}}`)
 
 func (j *Job) GetName(k string) (string, *regexp.Regexp, error) {
+	if j.Strategy == nil {
+		if j.Name == "" {
+			return k, nil, nil
+		}
+		if !strings.Contains(j.Name, "${{") {
+			return j.Name, nil, nil
+		}
+		r, err := regexp.Compile("^" + parameterRegexp.ReplaceAllLiteralString(j.Name, ".+") + "$")
+		if err != nil {
+			return "", nil, fmt.Errorf("convert a job name with parameters to a regular expression: %w", err)
+		}
+		return j.Name, r, nil
+	}
 	if j.Name == "" {
-		return k, nil, nil
+		r, err := regexp.Compile("^" + k + ` \(.*\)$`)
+		if err != nil {
+			return "", nil, fmt.Errorf("convert a job name with matrix to a regular expression: %w", err)
+		}
+		return k, r, nil
 	}
 	if !strings.Contains(j.Name, "${{") {
-		return j.Name, nil, nil
+		r, err := regexp.Compile("^" + j.Name + ` \(.*\)$`)
+		if err != nil {
+			return "", nil, fmt.Errorf("convert a job name with matrix to a regular expression: %w", err)
+		}
+		return j.Name, r, nil
 	}
 	r, err := regexp.Compile("^" + parameterRegexp.ReplaceAllLiteralString(j.Name, ".+") + "$")
 	if err != nil {

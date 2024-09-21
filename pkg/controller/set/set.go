@@ -35,6 +35,7 @@ func Set(ctx context.Context, logE *logrus.Entry, fs afero.Fs, param *Param) err
 
 	for _, file := range files {
 		logE := logE.WithField("workflow_file", file)
+		logE.Info("handling the workflow file")
 		if err := handleWorkflow(ctx, logE, fs, gh, file, param); err != nil {
 			return logerr.WithFields(err, logrus.Fields{ //nolint:wrapcheck
 				"workflow_file": file,
