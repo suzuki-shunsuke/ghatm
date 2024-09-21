@@ -16,7 +16,7 @@ type GitHub interface {
 	ListWorkflowJobs(ctx context.Context, owner, repo string, runID int64, opts *github.ListWorkflowJobsOptions) ([]*github.WorkflowJob, *github.Response, error)
 }
 
-func handleWorkflow(ctx context.Context, logE *logrus.Entry, fs afero.Fs, gh GitHub, file string, param *Param) error {
+func handleWorkflow(ctx context.Context, logE *logrus.Entry, fs afero.Fs, gh GitHub, file string, param *Param, workflowCalls map[string]map[string][]int) error {
 	content, err := afero.ReadFile(fs, file)
 	if err != nil {
 		return fmt.Errorf("read a file: %w", err)
@@ -34,7 +34,7 @@ func handleWorkflow(ctx context.Context, logE *logrus.Entry, fs afero.Fs, gh Git
 
 	var timeouts map[string]int
 	if param.Auto {
-		tm, err := estimateTimeout(ctx, logE, gh, param, file, wf, jobNames)
+		tm, err := estimateTimeout(ctx, logE, gh, param, file, wf, jobNames, workflowCalls)
 		if err != nil {
 			return err
 		}

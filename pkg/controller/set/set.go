@@ -2,9 +2,11 @@ package set
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
+	"github.com/suzuki-shunsuke/ghatm/pkg/edit"
 	"github.com/suzuki-shunsuke/ghatm/pkg/github"
 	"github.com/suzuki-shunsuke/logrus-error/logerr"
 )
@@ -33,12 +35,28 @@ func Set(ctx context.Context, logE *logrus.Entry, fs afero.Fs, param *Param) err
 		gh = github.NewClient(ctx)
 	}
 
+	workflowCalls := map[string]map[string][]int{}
+
 	for _, file := range files {
-		if err := handleWorkflow(ctx, logE, fs, gh, file, param); err != nil {
+		if err := handleWorkflow(ctx, logE, fs, gh, file, param, workflowCalls); err != nil {
 			return logerr.WithFields(err, logrus.Fields{ //nolint:wrapcheck
 				"file": file,
 			})
 		}
 	}
+
+	for workflowFileName, jobs := range workflowCalls {
+		for jobKey, timeouts := range jobs {
+			after, err := edit.Edit(content, wf, timeouts, param.TimeoutMinutes)
+			if err != nil {
+				return fmt.Errorf("create a new workflow content: %w", err)
+			}
+			if after == nil {
+				return nil
+			}
+			return writeWorkflow(fs, file, after)
+		}
+	}
+
 	return nil
 }

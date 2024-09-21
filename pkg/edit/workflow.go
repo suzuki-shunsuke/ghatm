@@ -11,7 +11,43 @@ import (
 )
 
 type Workflow struct {
+	On   *WorkflowOn
 	Jobs map[string]*Job
+}
+
+type WorkflowOn struct {
+	HasWorkflowCall bool
+}
+
+func (w *WorkflowOn) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var a any
+	if err := unmarshal(&a); err != nil {
+		return err
+	}
+	switch v := a.(type) {
+	case string:
+		w.HasWorkflowCall = v == "workflow_call"
+		return nil
+	case map[any]any:
+		_, ok := v["workflow_call"]
+		w.HasWorkflowCall = ok
+		return nil
+	case []any:
+		for _, b := range v {
+			c, ok := b.(string)
+			if !ok {
+				continue
+			}
+			if c == "workflow_call" {
+				w.HasWorkflowCall = true
+				return nil
+			}
+		}
+		w.HasWorkflowCall = false
+		return nil
+	default:
+		return errors.New("on is invalid")
+	}
 }
 
 type Job struct {
