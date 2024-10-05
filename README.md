@@ -66,6 +66,102 @@ aqua g -i suzuki-shunsuke/ghatm
 
 4. Download a prebuilt binary from [GitHub Releases](https://github.com/suzuki-shunsuke/ghatm/releases) and install it into `$PATH`
 
+<details>
+<summary>Verify downloaded assets from GitHub Releases</summary>
+
+You can verify downloaded assets using some tools.
+
+1. [GitHub CLI](https://cli.github.com/)
+1. [slsa-verifier](https://github.com/slsa-framework/slsa-verifier)
+1. [Cosign](https://github.com/sigstore/cosign)
+
+--
+
+1. GitHub CLI
+
+ghatm >= v0.3.3
+
+You can install GitHub CLI by aqua.
+
+```sh
+aqua g -i cli/cli
+```
+
+```sh
+gh release download -R suzuki-shunsuke/ghatm v0.3.3 -p ghatm_darwin_arm64.tar.gz
+gh attestation verify ghatm_darwin_arm64.tar.gz \
+  -R suzuki-shunsuke/ghatm \
+  --signer-workflow suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml
+```
+
+Output:
+
+```
+Loaded digest sha256:84298e8436f0b2c7f51cd4606848635471a11aaa03d7d0c410727630defe6b7e for file://ghatm_darwin_arm64.tar.gz
+Loaded 1 attestation from GitHub API
+✓ Verification succeeded!
+
+sha256:84298e8436f0b2c7f51cd4606848635471a11aaa03d7d0c410727630defe6b7e was attested by:
+REPO                                 PREDICATE_TYPE                  WORKFLOW
+suzuki-shunsuke/go-release-workflow  https://slsa.dev/provenance/v1  .github/workflows/release.yaml@7f97a226912ee2978126019b1e95311d7d15c97a
+```
+
+2. slsa-verifier
+
+You can install slsa-verifier by aqua.
+
+```sh
+aqua g -i slsa-framework/slsa-verifier
+```
+
+```sh
+gh release download -R suzuki-shunsuke/ghatm v0.3.3 -p ghatm_darwin_arm64.tar.gz  -p multiple.intoto.jsonl
+slsa-verifier verify-artifact ghatm_darwin_arm64.tar.gz \
+  --provenance-path multiple.intoto.jsonl \
+  --source-uri github.com/suzuki-shunsuke/ghatm \
+  --source-tag v0.3.3
+```
+
+Output:
+
+```
+Verified signature against tlog entry index 137035428 at URL: https://rekor.sigstore.dev/api/v1/log/entries/108e9186e8c5677a421587935f03afc5f73475e880b6f05962c5be8726ccb5011b7bf62a5d2a58bb
+Verified build using builder "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@refs/tags/v2.0.0" at commit 1af80d4aa0b6cc45bda5677fd45202ee2b90e1fc
+Verifying artifact ghatm_darwin_arm64.tar.gz: PASSED
+```
+
+3. Cosign
+
+You can install Cosign by aqua.
+
+```sh
+aqua g -i sigstore/cosign
+```
+
+```sh
+gh release download -R suzuki-shunsuke/ghatm v0.3.3
+cosign verify-blob \
+  --signature ghatm_0.3.3_checksums.txt.sig \
+  --certificate ghatm_0.3.3_checksums.txt.pem \
+  --certificate-identity-regexp 'https://github\.com/suzuki-shunsuke/go-release-workflow/\.github/workflows/release\.yaml@.*' \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+  ghatm_0.3.3_checksums.txt
+```
+
+Output:
+
+```
+Verified OK
+```
+
+After verifying the checksum, verify the artifact.
+
+```sh
+cat ghatm_0.3.3_checksums.txt | sha256sum -c --ignore-missing
+```
+
+</details>
+
 5. Go
 
 ```sh
