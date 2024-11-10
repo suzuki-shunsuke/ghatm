@@ -3,7 +3,7 @@ module github.com/suzuki-shunsuke/ghatm
 go 1.23.2
 
 require (
-	github.com/goccy/go-yaml v1.13.6
+	github.com/goccy/go-yaml v1.13.7
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-github/v65 v65.0.0
 	github.com/mattn/go-colorable v0.1.13
@@ -18,7 +18,6 @@ require (
 
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
-	github.com/fatih/color v1.18.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
