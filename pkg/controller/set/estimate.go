@@ -3,9 +3,11 @@ package set
 import (
 	"context"
 	"fmt"
+	"maps"
 	"math"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -13,8 +15,6 @@ import (
 	"github.com/suzuki-shunsuke/ghatm/pkg/edit"
 	"github.com/suzuki-shunsuke/ghatm/pkg/github"
 	"github.com/suzuki-shunsuke/logrus-error/logerr"
-	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 )
 
 func setNamePatterns(jobs map[string]*edit.Job, jobKeys map[string]struct{}, staticNames map[string]string, namePatterns map[string]*regexp.Regexp) error {
@@ -120,8 +120,8 @@ func getJobsByAPI(ctx context.Context, logE *logrus.Entry, gh GitHub, param *Par
 		return nil, err
 	}
 	logE.WithFields(logrus.Fields{
-		"static_names":  strings.Join(maps.Keys(staticNames), ", "),
-		"name_patterns": strings.Join(maps.Keys(namePatterns), ", "),
+		"static_names":  strings.Join(slices.Collect(maps.Keys(staticNames)), ", "),
+		"name_patterns": strings.Join(slices.Collect(maps.Keys(namePatterns)), ", "),
 	}).Debug("static names and name patterns")
 
 	jobDurationMap := make(map[string][]time.Duration, len(wf.Jobs))
