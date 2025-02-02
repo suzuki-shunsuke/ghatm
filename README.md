@@ -225,4 +225,3 @@ When workflow files are added or changed in a pull request, you can run `ghatm` 
 ## LICENSE
 
 [MIT](LICENSE)
-
