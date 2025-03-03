@@ -77,6 +77,28 @@ func TestEdit(t *testing.T) { //nolint:gocognit,cyclop,funlen
 				},
 			},
 		},
+		{
+			// The tool should recognize ${{ inputs.timeout }} in with-timeout job and add timeout to without-timeout job
+			name:    "reusable_workflow_timeout",
+			content: "reusable_workflow_timeout.yaml",
+			result:  "reusable_workflow_timeout_result.yaml",
+			wf: &Workflow{
+				Jobs: map[string]*Job{
+					"with-timeout": {
+						TimeoutMinutes: "${{ inputs.timeout }}", // This should be detected as having a timeout via inputs
+						Steps: []*Step{
+							{},
+						},
+					},
+					"without-timeout": {
+						TimeoutMinutes: nil, // This should get a default timeout added
+						Steps: []*Step{
+							{},
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, d := range data {
 		t.Run(d.name, func(t *testing.T) {

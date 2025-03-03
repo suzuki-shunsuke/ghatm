@@ -18,7 +18,7 @@ type Job struct {
 	Name           string
 	Steps          []*Step
 	Uses           string
-	TimeoutMinutes int `yaml:"timeout-minutes"`
+	TimeoutMinutes any `yaml:"timeout-minutes"`
 	Strategy       any
 }
 
