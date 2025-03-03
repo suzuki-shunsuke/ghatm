@@ -35,9 +35,27 @@ func ListJobsWithoutTimeout(jobs map[string]*Job) map[string]struct{} {
 }
 
 func hasTimeout(job *Job) bool {
-	if job.TimeoutMinutes.HasValue() || job.Uses != "" {
+	if job.Uses != "" {
 		return true
 	}
+
+	switch v := job.TimeoutMinutes.(type) {
+	case int:
+		if v != 0 {
+			return true
+		}
+	// An expression like "${{ inputs.timeout }}" is considered as having a timeout
+	case string:
+		if strings.Contains(v, "${{") {
+			return true
+		}
+	case nil:
+		// TimeoutMinutes is not set
+	default:
+		// Any other non-nil value is considered as having a timeout for future compatibility
+		return true
+	}
+
 	for _, step := range job.Steps {
 		if step.TimeoutMinutes == 0 {
 			return false

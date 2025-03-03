@@ -28,9 +28,7 @@ func TestEdit(t *testing.T) { //nolint:gocognit,cyclop,funlen
 						Uses: "suzuki-shunsuke/actionlint-workflow/.github/workflows/actionlint.yaml@813a6d08c08cfd7a08618a89a59bfe78e573597c # v1.0.1",
 					},
 					"foo": {
-						TimeoutMinutes: TimeoutMinutes{
-							IntValue: 5,
-						},
+						TimeoutMinutes: 5,
 						Steps: []*Step{
 							{},
 						},
@@ -64,9 +62,7 @@ func TestEdit(t *testing.T) { //nolint:gocognit,cyclop,funlen
 						Uses: "suzuki-shunsuke/actionlint-workflow/.github/workflows/actionlint.yaml@813a6d08c08cfd7a08618a89a59bfe78e573597c # v1.0.1",
 					},
 					"foo": {
-						TimeoutMinutes: TimeoutMinutes{
-							IntValue: 5,
-						},
+						TimeoutMinutes: 5,
 						Steps: []*Step{
 							{},
 						},
@@ -89,16 +85,13 @@ func TestEdit(t *testing.T) { //nolint:gocognit,cyclop,funlen
 			wf: &Workflow{
 				Jobs: map[string]*Job{
 					"with-timeout": {
-						TimeoutMinutes: TimeoutMinutes{
-							StringValue:  "${{ inputs.timeout }}",
-							IsExpression: true,
-						}, // This should be detected as having a timeout via inputs
+						TimeoutMinutes: "${{ inputs.timeout }}", // This should be detected as having a timeout via inputs
 						Steps: []*Step{
 							{},
 						},
 					},
 					"without-timeout": {
-						TimeoutMinutes: TimeoutMinutes{}, // This should get a default timeout added
+						TimeoutMinutes: nil, // This should get a default timeout added
 						Steps: []*Step{
 							{},
 						},

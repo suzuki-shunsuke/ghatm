@@ -14,49 +14,11 @@ type Workflow struct {
 	Jobs map[string]*Job
 }
 
-// TimeoutMinutes is a custom type that can be either an integer or an expression string
-type TimeoutMinutes struct {
-	IntValue     int
-	StringValue  string
-	IsExpression bool
-}
-
-// UnmarshalYAML implements the yaml.Unmarshaler interface
-func (t *TimeoutMinutes) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	// Try to unmarshal as int
-	var intValue int
-	if err := unmarshal(&intValue); err == nil {
-		t.IntValue = intValue
-		t.IsExpression = false
-		return nil
-	}
-
-	// Try to unmarshal as string
-	var strValue string
-	if err := unmarshal(&strValue); err != nil {
-		return err
-	}
-
-	// Check if the string is an expression
-	if !strings.Contains(strValue, "${{") {
-		return fmt.Errorf("timeout-minutes must be either an integer or an expression, got: %s", strValue)
-	}
-
-	t.StringValue = strValue
-	t.IsExpression = true
-	return nil
-}
-
-// HasValue returns true if the timeout has a value (either int or expression)
-func (t *TimeoutMinutes) HasValue() bool {
-	return t.IntValue != 0 || t.IsExpression
-}
-
 type Job struct {
 	Name           string
 	Steps          []*Step
 	Uses           string
-	TimeoutMinutes TimeoutMinutes `yaml:"timeout-minutes"`
+	TimeoutMinutes any `yaml:"timeout-minutes"`
 	Strategy       any
 }
 
