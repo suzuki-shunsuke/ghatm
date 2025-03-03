@@ -39,7 +39,7 @@ func hasTimeout(job *Job) bool {
 		return true
 	}
 	for _, step := range job.Steps {
-		if step.TimeoutMinutes == 0 {
+		if step.TimeoutMinutes == nil {
 			return false
 		}
 	}
