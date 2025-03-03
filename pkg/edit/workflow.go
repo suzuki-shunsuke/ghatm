@@ -23,7 +23,7 @@ type Job struct {
 }
 
 type Step struct {
-	TimeoutMinutes int `yaml:"timeout-minutes"`
+	TimeoutMinutes any `yaml:"timeout-minutes"`
 }
 
 // foo (${{inputs.name}}) -> ^foo (.+?)$
