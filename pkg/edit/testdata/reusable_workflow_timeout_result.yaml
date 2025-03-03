@@ -1,0 +1,25 @@
+name: Test for reusable workflow timeout
+on:
+  workflow_call:
+    inputs:
+      timeout:
+        required: false
+        type: number
+        default: 2
+jobs:
+  with-timeout:
+    timeout-minutes: ${{ inputs.timeout }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait
+        shell: bash
+        run: |
+          for i in {1..180}; do
+            echo "${i}"
+            sleep 1
+          done
+  without-timeout:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3

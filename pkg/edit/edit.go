@@ -35,7 +35,7 @@ func ListJobsWithoutTimeout(jobs map[string]*Job) map[string]struct{} {
 }
 
 func hasTimeout(job *Job) bool {
-	if job.TimeoutMinutes != 0 || job.Uses != "" {
+	if job.TimeoutMinutes.HasValue() || job.Uses != "" {
 		return true
 	}
 	for _, step := range job.Steps {

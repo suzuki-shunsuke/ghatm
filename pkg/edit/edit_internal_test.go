@@ -28,7 +28,9 @@ func TestEdit(t *testing.T) { //nolint:gocognit,cyclop,funlen
 						Uses: "suzuki-shunsuke/actionlint-workflow/.github/workflows/actionlint.yaml@813a6d08c08cfd7a08618a89a59bfe78e573597c # v1.0.1",
 					},
 					"foo": {
-						TimeoutMinutes: 5,
+						TimeoutMinutes: TimeoutMinutes{
+							IntValue: 5,
+						},
 						Steps: []*Step{
 							{},
 						},
@@ -62,7 +64,9 @@ func TestEdit(t *testing.T) { //nolint:gocognit,cyclop,funlen
 						Uses: "suzuki-shunsuke/actionlint-workflow/.github/workflows/actionlint.yaml@813a6d08c08cfd7a08618a89a59bfe78e573597c # v1.0.1",
 					},
 					"foo": {
-						TimeoutMinutes: 5,
+						TimeoutMinutes: TimeoutMinutes{
+							IntValue: 5,
+						},
 						Steps: []*Step{
 							{},
 						},
@@ -72,6 +76,31 @@ func TestEdit(t *testing.T) { //nolint:gocognit,cyclop,funlen
 							{
 								TimeoutMinutes: 5,
 							},
+						},
+					},
+				},
+			},
+		},
+		{
+			// The tool should recognize ${{ inputs.timeout }} in with-timeout job and add timeout to without-timeout job
+			name:    "reusable_workflow_timeout",
+			content: "reusable_workflow_timeout.yaml",
+			result:  "reusable_workflow_timeout_result.yaml",
+			wf: &Workflow{
+				Jobs: map[string]*Job{
+					"with-timeout": {
+						TimeoutMinutes: TimeoutMinutes{
+							StringValue:  "${{ inputs.timeout }}",
+							IsExpression: true,
+						}, // This should be detected as having a timeout via inputs
+						Steps: []*Step{
+							{},
+						},
+					},
+					"without-timeout": {
+						TimeoutMinutes: TimeoutMinutes{}, // This should get a default timeout added
+						Steps: []*Step{
+							{},
 						},
 					},
 				},
