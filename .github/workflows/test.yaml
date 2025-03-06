@@ -19,14 +19,6 @@ jobs:
               - .github/workflows/test.yaml
               - .github/workflows/wc-renovate-config-validator.yaml
 
-  status-check:
-    uses: ./.github/workflows/wc-status-check.yaml
-    permissions: {}
-    if: failure()
-    needs:
-      - renovate-config-validator
-      - test
-
   renovate-config-validator:
     uses: ./.github/workflows/wc-renovate-config-validator.yaml
     needs: path-filter
