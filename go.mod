@@ -8,7 +8,7 @@ require (
 	github.com/google/go-github/v69 v69.2.0
 	github.com/mattn/go-colorable v0.1.14
 	github.com/sirupsen/logrus v1.9.3
-	github.com/spf13/afero v1.13.0
+	github.com/spf13/afero v1.14.0
 	github.com/suzuki-shunsuke/logrus-error v0.1.4
 	github.com/urfave/cli/v2 v2.27.6
 	golang.org/x/oauth2 v0.28.0
