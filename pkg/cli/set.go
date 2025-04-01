@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghatm/pkg/controller/set"
 	"github.com/suzuki-shunsuke/ghatm/pkg/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type setCommand struct {
