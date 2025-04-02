@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -9,7 +10,7 @@ import (
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghatm/pkg/controller/set"
 	"github.com/suzuki-shunsuke/ghatm/pkg/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type setCommand struct {
@@ -42,7 +43,7 @@ $ ghatm set
 				Name:    "repo",
 				Aliases: []string{"r"},
 				Usage:   "GitHub Repository",
-				EnvVars: []string{"GITHUB_REPOSITORY"},
+				Sources: cli.EnvVars("GITHUB_REPOSITORY"),
 			},
 			&cli.IntFlag{
 				Name:    "size",
@@ -54,17 +55,17 @@ $ ghatm set
 	}
 }
 
-func (rc *setCommand) action(c *cli.Context) error {
+func (rc *setCommand) action(ctx context.Context, cmd *cli.Command) error {
 	fs := afero.NewOsFs()
 	logE := rc.logE
-	log.SetLevel(c.String("log-level"), logE)
-	log.SetColor(c.String("log-color"), logE)
-	repo := c.String("repo")
+	log.SetLevel(cmd.String("log-level"), logE)
+	log.SetColor(cmd.String("log-color"), logE)
+	repo := cmd.String("repo")
 	param := &set.Param{
-		Files:          c.Args().Slice(),
-		TimeoutMinutes: c.Int("timeout-minutes"),
-		Auto:           c.Bool("auto"),
-		Size:           c.Int("size"),
+		Files:          cmd.Args().Slice(),
+		TimeoutMinutes: int(cmd.Int("timeout-minutes")),
+		Auto:           cmd.Bool("auto"),
+		Size:           int(cmd.Int("size")),
 	}
 	if param.Auto && repo == "" {
 		return errors.New("the flag -auto requires the flag -repo")
@@ -77,5 +78,5 @@ func (rc *setCommand) action(c *cli.Context) error {
 		param.RepoOwner = owner
 		param.RepoName = repoName
 	}
-	return set.Set(c.Context, rc.logE, fs, param) //nolint:wrapcheck
+	return set.Set(ctx, rc.logE, fs, param) //nolint:wrapcheck
 }

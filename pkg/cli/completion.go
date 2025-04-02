@@ -1,11 +1,12 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"io"
 
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type completionCommand struct {
@@ -35,7 +36,7 @@ fish
 
 ghatm completion fish > ~/.config/fish/completions/ghatm.fish
 `,
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			{
 				Name:   "bash",
 				Usage:  "Output shell completion script for bash",
@@ -55,7 +56,7 @@ ghatm completion fish > ~/.config/fish/completions/ghatm.fish
 	}
 }
 
-func (cc *completionCommand) bashCompletionAction(*cli.Context) error {
+func (cc *completionCommand) bashCompletionAction(context.Context, *cli.Command) error {
 	// https://github.com/urfave/cli/blob/main/autocomplete/bash_autocomplete
 	// https://github.com/urfave/cli/blob/c3f51bed6fffdf84227c5b59bd3f2e90683314df/autocomplete/bash_autocomplete#L5-L20
 	fmt.Fprintln(cc.stdout, `
@@ -78,7 +79,7 @@ complete -o bashdefault -o default -o nospace -F _cli_bash_autocomplete ghatm`)
 	return nil
 }
 
-func (cc *completionCommand) zshCompletionAction(*cli.Context) error {
+func (cc *completionCommand) zshCompletionAction(context.Context, *cli.Command) error {
 	// https://github.com/urfave/cli/blob/main/autocomplete/zsh_autocomplete
 	// https://github.com/urfave/cli/blob/947f9894eef4725a1c15ed75459907b52dde7616/autocomplete/zsh_autocomplete
 	fmt.Fprintln(cc.stdout, `#compdef ghatm
@@ -108,8 +109,8 @@ fi`)
 	return nil
 }
 
-func (cc *completionCommand) fishCompletionAction(c *cli.Context) error {
-	s, err := c.App.ToFishCompletion()
+func (cc *completionCommand) fishCompletionAction(_ context.Context, c *cli.Command) error {
+	s, err := c.ToFishCompletion()
 	if err != nil {
 		return fmt.Errorf("generate fish completion: %w", err)
 	}
