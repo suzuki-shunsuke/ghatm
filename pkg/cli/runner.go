@@ -5,6 +5,8 @@ import (
 	"io"
 
 	"github.com/sirupsen/logrus"
+	"github.com/suzuki-shunsuke/urfave-cli-v3-util/helpall"
+	"github.com/suzuki-shunsuke/urfave-cli-v3-util/vcmd"
 	"github.com/urfave/cli/v3"
 )
 
@@ -23,7 +25,7 @@ type LDFlags struct {
 }
 
 func (r *Runner) Run(ctx context.Context, args ...string) error {
-	return (&cli.Command{ //nolint:wrapcheck
+	return helpall.With(&cli.Command{ //nolint:wrapcheck
 		Name:    "ghatm",
 		Usage:   "",
 		Version: r.LDFlags.Version + " (" + r.LDFlags.Commit + ")",
@@ -39,7 +41,6 @@ func (r *Runner) Run(ctx context.Context, args ...string) error {
 		},
 		EnableShellCompletion: true,
 		Commands: []*cli.Command{
-			(&versionCommand{}).command(),
 			(&setCommand{
 				logE: r.LogE,
 			}).command(),
@@ -47,6 +48,11 @@ func (r *Runner) Run(ctx context.Context, args ...string) error {
 				logE:   r.LogE,
 				stdout: r.Stdout,
 			}).command(),
+			vcmd.New(&vcmd.Command{
+				Name:    "ghatm",
+				Version: r.LDFlags.Version,
+				SHA:     r.LDFlags.Commit,
+			}),
 		},
-	}).Run(ctx, args)
+	}, nil).Run(ctx, args)
 }
