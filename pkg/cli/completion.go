@@ -66,9 +66,9 @@ _cli_bash_autocomplete() {
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     if [[ "$cur" == "-"* ]]; then
-      opts=$( ${COMP_WORDS[@]:0:$COMP_CWORD} ${cur} --generate-bash-completion )
+      opts=$( ${COMP_WORDS[@]:0:$COMP_CWORD} ${cur} --generate-shell-completion )
     else
-      opts=$( ${COMP_WORDS[@]:0:$COMP_CWORD} --generate-bash-completion )
+      opts=$( ${COMP_WORDS[@]:0:$COMP_CWORD} --generate-shell-completion )
     fi
     COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
     return 0
@@ -89,9 +89,9 @@ _ghatm() {
   local cur
   cur=${words[-1]}
   if [[ "$cur" == "-"* ]]; then
-    opts=("${(@f)$(${words[@]:0:#words[@]-1} ${cur} --generate-bash-completion)}")
+    opts=("${(@f)$(${words[@]:0:#words[@]-1} ${cur} --generate-shell-completion)}")
   else
-    opts=("${(@f)$(${words[@]:0:#words[@]-1} --generate-bash-completion)}")
+    opts=("${(@f)$(${words[@]:0:#words[@]-1} --generate-shell-completion)}")
   fi
 
   if [[ "${opts[1]}" != "" ]]; then
