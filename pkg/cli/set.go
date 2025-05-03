@@ -63,9 +63,9 @@ func (rc *setCommand) action(ctx context.Context, cmd *cli.Command) error {
 	repo := cmd.String("repo")
 	param := &set.Param{
 		Files:          cmd.Args().Slice(),
-		TimeoutMinutes: int(cmd.Int("timeout-minutes")),
+		TimeoutMinutes: cmd.Int("timeout-minutes"),
 		Auto:           cmd.Bool("auto"),
-		Size:           int(cmd.Int("size")),
+		Size:           cmd.Int("size"),
 	}
 	if param.Auto && repo == "" {
 		return errors.New("the flag -auto requires the flag -repo")
