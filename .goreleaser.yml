@@ -83,3 +83,7 @@ scoops:
     repository:
       owner: suzuki-shunsuke
       name: scoop-bucket
+
+sboms:
+  - id: default
+    disable: false
