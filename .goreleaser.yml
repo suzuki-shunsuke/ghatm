@@ -7,6 +7,10 @@ archives:
     format_overrides:
       - goos: windows
         formats: [zip]
+    files:
+      - LICENSE
+      - README.md
+      - third_party_licenses/**/*
 
 builds:
   - binary: ghatm
@@ -22,7 +26,7 @@ builds:
       - arm64
 
 release:
-  prerelease: true
+  prerelease: "true"
   header: |
     [Pull Requests](https://github.com/suzuki-shunsuke/ghatm/pulls?q=is%3Apr+milestone%3A{{.Tag}}) | [Issues](https://github.com/suzuki-shunsuke/ghatm/issues?q=is%3Aissue+milestone%3A{{.Tag}}) | https://github.com/suzuki-shunsuke/ghatm/compare/{{.PreviousTag}}...{{.Tag}}
 
@@ -43,7 +47,7 @@ signs:
       - github
       - ${artifact}
 
-brews:
+homebrew_casks:
   -
     # NOTE: make sure the url_template, the token and given repo (github or gitlab) owner and name are from the
     # same kind. We will probably unify this in the next major version like it is done with scoop.
@@ -72,17 +76,7 @@ brews:
     # Default is false.
     skip_upload: true
 
-    # So you can `brew test` your formula.
-    # Default is empty.
-    test: |
-      system "#{bin}/ghatm --version"
 
-    # Additional install instructions so you don't need to override `install`.
-    #
-    # Template: allowed
-    # Since: v1.20
-    extra_install: |
-      generate_completions_from_executable(bin/"ghatm", "completion", shells: [:bash, :zsh, :fish])
 
 scoops:
   -
@@ -93,3 +87,7 @@ scoops:
     repository:
       owner: suzuki-shunsuke
       name: scoop-bucket
+
+sboms:
+  - id: default
+    disable: false
