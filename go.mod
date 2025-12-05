@@ -1,6 +1,6 @@
 module github.com/suzuki-shunsuke/ghatm
 
-go 1.25.4
+go 1.25.5
 
 require (
 	github.com/goccy/go-yaml v1.19.0
