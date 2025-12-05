@@ -2,11 +2,11 @@ package set
 
 import (
 	"context"
+	"log/slog"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghatm/pkg/github"
-	"github.com/suzuki-shunsuke/logrus-error/logerr"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 type Param struct {
@@ -18,7 +18,7 @@ type Param struct {
 	Size           int
 }
 
-func Set(ctx context.Context, logE *logrus.Entry, fs afero.Fs, param *Param) error {
+func Set(ctx context.Context, logger *slog.Logger, fs afero.Fs, param *Param) error {
 	files := param.Files
 	if len(files) == 0 {
 		a, err := findWorkflows(fs)
@@ -34,12 +34,10 @@ func Set(ctx context.Context, logE *logrus.Entry, fs afero.Fs, param *Param) err
 	}
 
 	for _, file := range files {
-		logE := logE.WithField("workflow_file", file)
-		logE.Info("handling the workflow file")
-		if err := handleWorkflow(ctx, logE, fs, gh, file, param); err != nil {
-			return logerr.WithFields(err, logrus.Fields{ //nolint:wrapcheck
-				"workflow_file": file,
-			})
+		logger := logger.With("workflow_file", file)
+		logger.Info("handling the workflow file")
+		if err := handleWorkflow(ctx, logger, fs, gh, file, param); err != nil {
+			return slogerr.With(err, "workflow_file", file) //nolint:wrapcheck
 		}
 	}
 	return nil

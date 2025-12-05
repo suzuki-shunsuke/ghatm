@@ -6,8 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/sirupsen/logrus"
-	"github.com/suzuki-shunsuke/logrus-error/logerr"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 type Workflow struct {
@@ -74,7 +73,7 @@ func (w *Workflow) Validate() error {
 	}
 	for jobName, job := range w.Jobs {
 		if err := job.Validate(); err != nil {
-			return logerr.WithFields(err, logrus.Fields{"job": jobName}) //nolint:wrapcheck
+			return slogerr.With(err, "job", jobName) //nolint:wrapcheck
 		}
 	}
 	return nil
