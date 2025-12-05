@@ -3,8 +3,8 @@ package set
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghatm/pkg/edit"
 	"github.com/suzuki-shunsuke/ghatm/pkg/github"
@@ -13,10 +13,10 @@ import (
 
 type GitHub interface {
 	ListWorkflowRuns(ctx context.Context, owner, repo, workflowFileName string, opts *github.ListWorkflowRunsOptions) ([]*github.WorkflowRun, *github.Response, error)
-	ListWorkflowJobs(ctx context.Context, logE *logrus.Entry, owner, repo string, runID int64, opts *github.ListWorkflowJobsOptions) ([]*github.WorkflowJob, *github.Response, error)
+	ListWorkflowJobs(ctx context.Context, logger *slog.Logger, owner, repo string, runID int64, opts *github.ListWorkflowJobsOptions) ([]*github.WorkflowJob, *github.Response, error)
 }
 
-func handleWorkflow(ctx context.Context, logE *logrus.Entry, fs afero.Fs, gh GitHub, file string, param *Param) error {
+func handleWorkflow(ctx context.Context, logger *slog.Logger, fs afero.Fs, gh GitHub, file string, param *Param) error {
 	content, err := afero.ReadFile(fs, file)
 	if err != nil {
 		return fmt.Errorf("read a file: %w", err)
@@ -34,7 +34,7 @@ func handleWorkflow(ctx context.Context, logE *logrus.Entry, fs afero.Fs, gh Git
 
 	var timeouts map[string]int
 	if param.Auto {
-		tm, err := estimateTimeout(ctx, logE, gh, param, file, wf, jobNames)
+		tm, err := estimateTimeout(ctx, logger, gh, param, file, wf, jobNames)
 		if err != nil {
 			return err
 		}

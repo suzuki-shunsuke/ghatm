@@ -4,17 +4,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strings"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghatm/pkg/controller/set"
-	"github.com/suzuki-shunsuke/ghatm/pkg/log"
+	"github.com/suzuki-shunsuke/slog-util/slogutil"
 	"github.com/urfave/cli/v3"
 )
 
 type setCommand struct {
-	logE *logrus.Entry
+	logger      *slog.Logger
+	logLevelVar *slog.LevelVar
 }
 
 func (rc *setCommand) command() *cli.Command {
@@ -57,9 +58,10 @@ $ ghatm set
 
 func (rc *setCommand) action(ctx context.Context, cmd *cli.Command) error {
 	fs := afero.NewOsFs()
-	logE := rc.logE
-	log.SetLevel(cmd.String("log-level"), logE)
-	log.SetColor(cmd.String("log-color"), logE)
+	logger := rc.logger
+	if err := slogutil.SetLevel(rc.logLevelVar, cmd.String("log-level")); err != nil {
+		return fmt.Errorf("set log level: %w", err)
+	}
 	repo := cmd.String("repo")
 	param := &set.Param{
 		Files:          cmd.Args().Slice(),
@@ -78,5 +80,5 @@ func (rc *setCommand) action(ctx context.Context, cmd *cli.Command) error {
 		param.RepoOwner = owner
 		param.RepoName = repoName
 	}
-	return set.Set(ctx, rc.logE, fs, param) //nolint:wrapcheck
+	return set.Set(ctx, logger, fs, param) //nolint:wrapcheck
 }

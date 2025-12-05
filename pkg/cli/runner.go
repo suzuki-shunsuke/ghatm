@@ -3,19 +3,20 @@ package cli
 import (
 	"context"
 	"io"
+	"log/slog"
 
-	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/urfave-cli-v3-util/helpall"
 	"github.com/suzuki-shunsuke/urfave-cli-v3-util/vcmd"
 	"github.com/urfave/cli/v3"
 )
 
 type Runner struct {
-	Stdin   io.Reader
-	Stdout  io.Writer
-	Stderr  io.Writer
-	LDFlags *LDFlags
-	LogE    *logrus.Entry
+	Stdin       io.Reader
+	Stdout      io.Writer
+	Stderr      io.Writer
+	LDFlags     *LDFlags
+	Logger      *slog.Logger
+	LogLevelVar *slog.LevelVar
 }
 
 type LDFlags struct {
@@ -34,18 +35,14 @@ func (r *Runner) Run(ctx context.Context, args ...string) error {
 				Name:  "log-level",
 				Usage: "log level",
 			},
-			&cli.StringFlag{
-				Name:  "log-color",
-				Usage: "Log color. One of 'auto' (default), 'always', 'never'",
-			},
 		},
 		EnableShellCompletion: true,
 		Commands: []*cli.Command{
 			(&setCommand{
-				logE: r.LogE,
+				logger:      r.Logger,
+				logLevelVar: r.LogLevelVar,
 			}).command(),
 			(&completionCommand{
-				logE:   r.LogE,
 				stdout: r.Stdout,
 			}).command(),
 			vcmd.New(&vcmd.Command{

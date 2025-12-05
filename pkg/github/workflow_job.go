@@ -2,10 +2,10 @@ package github
 
 import (
 	"context"
+	"log/slog"
 	"time"
 
 	"github.com/google/go-github/v79/github"
-	"github.com/sirupsen/logrus"
 )
 
 type ListWorkflowJobsOptions struct {
@@ -26,7 +26,7 @@ type WorkflowJob struct {
 	Duration   time.Duration
 }
 
-func (c *Client) ListWorkflowJobs(ctx context.Context, logE *logrus.Entry, owner, repo string, runID int64, opts *ListWorkflowJobsOptions) ([]*WorkflowJob, *github.Response, error) {
+func (c *Client) ListWorkflowJobs(ctx context.Context, logger *slog.Logger, owner, repo string, runID int64, opts *ListWorkflowJobsOptions) ([]*WorkflowJob, *github.Response, error) {
 	o := &github.ListWorkflowJobsOptions{
 		ListOptions: github.ListOptions{
 			PerPage: 100, //nolint:mnd
@@ -52,10 +52,7 @@ func (c *Client) ListWorkflowJobs(ctx context.Context, logE *logrus.Entry, owner
 			Duration:   job.GetCompletedAt().Sub(*started),
 		}
 		if j.Status != "completed" || j.Conclusion != "success" {
-			logE.WithFields(logrus.Fields{
-				"status":     j.Status,
-				"conclusion": j.Conclusion,
-			}).Debug("skip the job")
+			logger.Debug("skip the job", "status", j.Status, "conclusion", j.Conclusion)
 			continue
 		}
 		ret = append(ret, j)

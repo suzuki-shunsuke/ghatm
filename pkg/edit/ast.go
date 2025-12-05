@@ -6,8 +6,7 @@ import (
 
 	"github.com/goccy/go-yaml/ast"
 	"github.com/goccy/go-yaml/parser"
-	"github.com/sirupsen/logrus"
-	"github.com/suzuki-shunsuke/logrus-error/logerr"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 type Position struct {
@@ -104,14 +103,10 @@ func parseJobAST(value *ast.MappingValueNode, jobNames map[string]struct{}) (*Po
 	}
 	fields, err := getMappingValueNodes(value)
 	if err != nil {
-		return nil, logerr.WithFields(err, logrus.Fields{ //nolint:wrapcheck
-			"job": jobName,
-		})
+		return nil, slogerr.With(err, "job", jobName) //nolint:wrapcheck
 	}
 	if len(fields) == 0 {
-		return nil, logerr.WithFields(errors.New("job doesn't have any field"), logrus.Fields{ //nolint:wrapcheck
-			"job": jobName,
-		})
+		return nil, slogerr.With(errors.New("job doesn't have any field"), "job", jobName) //nolint:wrapcheck
 	}
 	firstValue := fields[0]
 	pos := firstValue.Key.GetToken().Position
