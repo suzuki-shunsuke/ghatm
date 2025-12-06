@@ -17,6 +17,10 @@ func Run(ctx context.Context, logger *slogutil.Logger, env *urfave.Env) error {
 				Name:  "log-level",
 				Usage: "log level",
 			},
+			&cli.StringFlag{
+				Name:  "log-color",
+				Usage: "Log color. One of 'auto', 'always' (default), 'never'",
+			},
 		},
 		Commands: []*cli.Command{
 			(&setCommand{}).command(logger),

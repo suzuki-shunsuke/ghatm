@@ -26,6 +26,14 @@ $ ghatm set
 `,
 		Action: urfave.Action(rc.action, logger),
 		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "log-level",
+				Usage: "log level",
+			},
+			&cli.StringFlag{
+				Name:  "log-color",
+				Usage: "Log color. One of 'auto', 'always' (default), 'never'",
+			},
 			&cli.IntFlag{
 				Name:    "timeout-minutes",
 				Aliases: []string{"t"},
@@ -57,6 +65,9 @@ func (rc *setCommand) action(ctx context.Context, cmd *cli.Command, logger *slog
 	fs := afero.NewOsFs()
 	if err := logger.SetLevel(cmd.String("log-level")); err != nil {
 		return fmt.Errorf("set log level: %w", err)
+	}
+	if err := logger.SetColor(cmd.String("log-color")); err != nil {
+		return fmt.Errorf("set log color: %w", err)
 	}
 	repo := cmd.String("repo")
 	param := &set.Param{
