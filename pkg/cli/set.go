@@ -4,21 +4,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
 	"strings"
 
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghatm/pkg/controller/set"
 	"github.com/suzuki-shunsuke/slog-util/slogutil"
+	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
 	"github.com/urfave/cli/v3"
 )
 
-type setCommand struct {
-	logger      *slog.Logger
-	logLevelVar *slog.LevelVar
-}
+type setCommand struct{}
 
-func (rc *setCommand) command() *cli.Command {
+func (rc *setCommand) command(logger *slogutil.Logger) *cli.Command {
 	return &cli.Command{
 		Name:      "set",
 		Usage:     "Set timeout-minutes to GitHub Actions jobs which don't have timeout-minutes",
@@ -27,8 +24,16 @@ func (rc *setCommand) command() *cli.Command {
 
 $ ghatm set
 `,
-		Action: rc.action,
+		Action: urfave.Action(rc.action, logger),
 		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "log-level",
+				Usage: "log level",
+			},
+			&cli.StringFlag{
+				Name:  "log-color",
+				Usage: "Log color. One of 'auto', 'always' (default), 'never'",
+			},
 			&cli.IntFlag{
 				Name:    "timeout-minutes",
 				Aliases: []string{"t"},
@@ -56,11 +61,13 @@ $ ghatm set
 	}
 }
 
-func (rc *setCommand) action(ctx context.Context, cmd *cli.Command) error {
+func (rc *setCommand) action(ctx context.Context, cmd *cli.Command, logger *slogutil.Logger) error {
 	fs := afero.NewOsFs()
-	logger := rc.logger
-	if err := slogutil.SetLevel(rc.logLevelVar, cmd.String("log-level")); err != nil {
+	if err := logger.SetLevel(cmd.String("log-level")); err != nil {
 		return fmt.Errorf("set log level: %w", err)
+	}
+	if err := logger.SetColor(cmd.String("log-color")); err != nil {
+		return fmt.Errorf("set log color: %w", err)
 	}
 	repo := cmd.String("repo")
 	param := &set.Param{
@@ -80,5 +87,5 @@ func (rc *setCommand) action(ctx context.Context, cmd *cli.Command) error {
 		param.RepoOwner = owner
 		param.RepoName = repoName
 	}
-	return set.Set(ctx, logger, fs, param) //nolint:wrapcheck
+	return set.Set(ctx, logger.Logger, fs, param) //nolint:wrapcheck
 }
