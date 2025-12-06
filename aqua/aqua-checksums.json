@@ -221,6 +221,36 @@
       "algorithm": "sha256"
     },
     {
+      "id": "github_release/github.com/suzuki-shunsuke/ghatm/v1.0.0/ghatm_darwin_amd64.tar.gz",
+      "checksum": "1D9EEF823CBC2A7E8789C0A1511896292A831D477670B9B4180A9A9DB817EBAD",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/suzuki-shunsuke/ghatm/v1.0.0/ghatm_darwin_arm64.tar.gz",
+      "checksum": "63204EB557D71E8CF5AF739A82444CF231581F067E36903AECE3E172544D16A8",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/suzuki-shunsuke/ghatm/v1.0.0/ghatm_linux_amd64.tar.gz",
+      "checksum": "22195C41BC439958E3983AD1CF6F7B2D3ED8A0685DF4B15BFF5B2BBFB38118ED",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/suzuki-shunsuke/ghatm/v1.0.0/ghatm_linux_arm64.tar.gz",
+      "checksum": "92368685124A3A7DB0E59C2C56E9AB1AF3EAF636A8F891C86684F5B6010ED5E5",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/suzuki-shunsuke/ghatm/v1.0.0/ghatm_windows_amd64.zip",
+      "checksum": "B195C25AB335729EAF63FE9C40185091E9E87BF709C7A487E7B258096BE2B63A",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/suzuki-shunsuke/ghatm/v1.0.0/ghatm_windows_arm64.zip",
+      "checksum": "58721135592547169328CCDAA60B12D20E14575AFE2E2760571BFB19CD9C664D",
+      "algorithm": "sha256"
+    },
+    {
       "id": "registries/github_content/github.com/aquaproj/aqua-registry/v4.444.0/registry.yaml",
       "checksum": "529A890C667CFC10A3F567D92D381DF66219ADD4BA587BE3EFFBA12D390A1B43AC8051BEBFCC6DCC0E7F84DC40A72F8897764E186F49C3D72B2059E9EE1B1A24",
       "algorithm": "sha512"
