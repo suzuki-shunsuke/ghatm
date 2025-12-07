@@ -19,7 +19,7 @@ type SetFlags struct {
 	Auto           bool
 	Repo           string
 	Size           int
-	Args           []string
+	Files          []string
 }
 
 type setCommand struct{}
@@ -27,16 +27,17 @@ type setCommand struct{}
 func (rc *setCommand) command(logger *slogutil.Logger, globalFlags *GlobalFlags) *cli.Command {
 	flags := &SetFlags{GlobalFlags: globalFlags}
 	return &cli.Command{
-		Name:      "set",
-		Usage:     "Set timeout-minutes to GitHub Actions jobs which don't have timeout-minutes",
-		UsageText: "ghatm set",
-		Description: `Set timeout-minutes to GitHub Actions jobs which don't have timeout-minutes.
-
-$ ghatm set
-`,
-		Action: func(ctx context.Context, cmd *cli.Command) error {
-			flags.Args = cmd.Args().Slice()
+		Name:  "set",
+		Usage: "Set timeout-minutes to GitHub Actions jobs which don't have timeout-minutes",
+		Action: func(ctx context.Context, _ *cli.Command) error {
 			return rc.action(ctx, logger, flags)
+		},
+		Arguments: []cli.Argument{
+			&cli.StringArgs{
+				Name:        "file",
+				Destination: &flags.Files,
+				Max:         -1,
+			},
 		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
@@ -89,7 +90,7 @@ func (rc *setCommand) action(ctx context.Context, logger *slogutil.Logger, flags
 		return fmt.Errorf("set log color: %w", err)
 	}
 	param := &set.Param{
-		Files:          flags.Args,
+		Files:          flags.Files,
 		TimeoutMinutes: flags.TimeoutMinutes,
 		Auto:           flags.Auto,
 		Size:           flags.Size,
