@@ -9,13 +9,23 @@ import (
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghatm/pkg/controller/set"
 	"github.com/suzuki-shunsuke/slog-util/slogutil"
-	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
 	"github.com/urfave/cli/v3"
 )
 
+type SetFlags struct {
+	*GlobalFlags
+
+	TimeoutMinutes int
+	Auto           bool
+	Repo           string
+	Size           int
+	Args           []string
+}
+
 type setCommand struct{}
 
-func (rc *setCommand) command(logger *slogutil.Logger) *cli.Command {
+func (rc *setCommand) command(logger *slogutil.Logger, globalFlags *GlobalFlags) *cli.Command {
+	flags := &SetFlags{GlobalFlags: globalFlags}
 	return &cli.Command{
 		Name:      "set",
 		Usage:     "Set timeout-minutes to GitHub Actions jobs which don't have timeout-minutes",
@@ -24,65 +34,73 @@ func (rc *setCommand) command(logger *slogutil.Logger) *cli.Command {
 
 $ ghatm set
 `,
-		Action: urfave.Action(rc.action, logger),
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			flags.Args = cmd.Args().Slice()
+			return rc.action(ctx, logger, flags)
+		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "log-level",
-				Usage: "log level",
+				Name:        "log-level",
+				Usage:       "log level",
+				Destination: &flags.LogLevel,
 			},
 			&cli.StringFlag{
-				Name:  "log-color",
-				Usage: "Log color. One of 'auto', 'always' (default), 'never'",
+				Name:        "log-color",
+				Usage:       "Log color. One of 'auto', 'always' (default), 'never'",
+				Destination: &flags.LogColor,
 			},
 			&cli.IntFlag{
-				Name:    "timeout-minutes",
-				Aliases: []string{"t"},
-				Usage:   "The value of timeout-minutes",
-				Value:   30, //nolint:mnd
+				Name:        "timeout-minutes",
+				Aliases:     []string{"t"},
+				Usage:       "The value of timeout-minutes",
+				Value:       30, //nolint:mnd
+				Destination: &flags.TimeoutMinutes,
 			},
 			&cli.BoolFlag{
-				Name:    "auto",
-				Aliases: []string{"a"},
-				Usage:   "Estimate the value of timeout-minutes automatically",
+				Name:        "auto",
+				Aliases:     []string{"a"},
+				Usage:       "Estimate the value of timeout-minutes automatically",
+				Destination: &flags.Auto,
 			},
 			&cli.StringFlag{
-				Name:    "repo",
-				Aliases: []string{"r"},
-				Usage:   "GitHub Repository",
-				Sources: cli.EnvVars("GITHUB_REPOSITORY"),
+				Name:        "repo",
+				Aliases:     []string{"r"},
+				Usage:       "GitHub Repository",
+				Sources:     cli.EnvVars("GITHUB_REPOSITORY"),
+				Destination: &flags.Repo,
 			},
 			&cli.IntFlag{
-				Name:    "size",
-				Aliases: []string{"s"},
-				Usage:   "Data size",
-				Value:   30, //nolint:mnd
+				Name:        "size",
+				Aliases:     []string{"s"},
+				Usage:       "Data size",
+				Value:       30, //nolint:mnd
+				Destination: &flags.Size,
 			},
 		},
 	}
 }
 
-func (rc *setCommand) action(ctx context.Context, cmd *cli.Command, logger *slogutil.Logger) error {
+func (rc *setCommand) action(ctx context.Context, logger *slogutil.Logger, flags *SetFlags) error {
 	fs := afero.NewOsFs()
-	if err := logger.SetLevel(cmd.String("log-level")); err != nil {
+	if err := logger.SetLevel(flags.LogLevel); err != nil {
 		return fmt.Errorf("set log level: %w", err)
 	}
-	if err := logger.SetColor(cmd.String("log-color")); err != nil {
+	if err := logger.SetColor(flags.LogColor); err != nil {
 		return fmt.Errorf("set log color: %w", err)
 	}
-	repo := cmd.String("repo")
 	param := &set.Param{
-		Files:          cmd.Args().Slice(),
-		TimeoutMinutes: cmd.Int("timeout-minutes"),
-		Auto:           cmd.Bool("auto"),
-		Size:           cmd.Int("size"),
+		Files:          flags.Args,
+		TimeoutMinutes: flags.TimeoutMinutes,
+		Auto:           flags.Auto,
+		Size:           flags.Size,
 	}
-	if param.Auto && repo == "" {
+	if param.Auto && flags.Repo == "" {
 		return errors.New("the flag -auto requires the flag -repo")
 	}
-	if repo != "" {
-		owner, repoName, ok := strings.Cut(repo, "/")
+	if flags.Repo != "" {
+		owner, repoName, ok := strings.Cut(flags.Repo, "/")
 		if !ok {
-			return fmt.Errorf("split the repository name: %s", repo)
+			return fmt.Errorf("split the repository name: %s", flags.Repo)
 		}
 		param.RepoOwner = owner
 		param.RepoName = repoName

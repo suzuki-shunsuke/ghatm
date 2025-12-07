@@ -8,22 +8,30 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+type GlobalFlags struct {
+	LogLevel string
+	LogColor string
+}
+
 func Run(ctx context.Context, logger *slogutil.Logger, env *urfave.Env) error {
+	globalFlags := &GlobalFlags{}
 	return urfave.Command(env, &cli.Command{ //nolint:wrapcheck
 		Name:  "ghatm",
 		Usage: "Set timeout-minutes to all GitHub Actions jobs. https://github.com/suzuki-shunsuke/ghatm",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "log-level",
-				Usage: "log level",
+				Name:        "log-level",
+				Usage:       "log level",
+				Destination: &globalFlags.LogLevel,
 			},
 			&cli.StringFlag{
-				Name:  "log-color",
-				Usage: "Log color. One of 'auto', 'always' (default), 'never'",
+				Name:        "log-color",
+				Usage:       "Log color. One of 'auto', 'always' (default), 'never'",
+				Destination: &globalFlags.LogColor,
 			},
 		},
 		Commands: []*cli.Command{
-			(&setCommand{}).command(logger),
+			(&setCommand{}).command(logger, globalFlags),
 		},
 	}).Run(ctx, env.Args)
 }
