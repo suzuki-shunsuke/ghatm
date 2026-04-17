@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/google/go-github/v80/github"
+	"github.com/google/go-github/v84/github"
 )
 
 type ListWorkflowJobsOptions struct {
