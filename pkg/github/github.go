@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -11,8 +12,12 @@ import (
 
 type Response = github.Response
 
-func newGitHub(ctx context.Context) *github.Client {
-	return github.NewClient(getHTTPClientForGitHub(ctx, getGitHubToken()))
+func newGitHub(ctx context.Context) (*github.Client, error) {
+	client, err := github.NewClient(github.WithHTTPClient(getHTTPClientForGitHub(ctx, getGitHubToken())))
+	if err != nil {
+		return nil, fmt.Errorf("create a GitHub client: %w", err)
+	}
+	return client, nil
 }
 
 func getGitHubToken() string {
@@ -40,8 +45,12 @@ type Client struct {
 	actions ActionsService
 }
 
-func NewClient(ctx context.Context) *Client {
-	return &Client{
-		actions: newGitHub(ctx).Actions,
+func NewClient(ctx context.Context) (*Client, error) {
+	gh, err := newGitHub(ctx)
+	if err != nil {
+		return nil, err
 	}
+	return &Client{
+		actions: gh.Actions,
+	}, nil
 }

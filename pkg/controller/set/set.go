@@ -30,7 +30,11 @@ func Set(ctx context.Context, logger *slog.Logger, fs afero.Fs, param *Param) er
 
 	var gh *github.Client
 	if param.Auto {
-		gh = github.NewClient(ctx)
+		a, err := github.NewClient(ctx)
+		if err != nil {
+			return err
+		}
+		gh = a
 	}
 
 	for _, file := range files {
