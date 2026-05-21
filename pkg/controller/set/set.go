@@ -2,6 +2,7 @@ package set
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
 	"github.com/spf13/afero"
@@ -30,7 +31,11 @@ func Set(ctx context.Context, logger *slog.Logger, fs afero.Fs, param *Param) er
 
 	var gh *github.Client
 	if param.Auto {
-		gh = github.NewClient(ctx)
+		a, err := github.NewClient(ctx)
+		if err != nil {
+			return fmt.Errorf("create a GitHub client: %w", err)
+		}
+		gh = a
 	}
 
 	for _, file := range files {
