@@ -6,12 +6,17 @@ on:
       docker_is_changed:
         required: false
         type: boolean
+    secrets:
+      TAKUMI_GUARD_BOT_ID:
+        required: true
 
 jobs:
   test:
     timeout-minutes: 30
     runs-on: ubuntu-latest
-    permissions: {}
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
@@ -20,6 +25,11 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+
+      - uses: flatt-security/setup-takumi-guard-golang@2e3c7c40b538cd68b2ac483def12982ebc8bc02e # v1
+        with:
+          bot-id: ${{secrets.TAKUMI_GUARD_BOT_ID}}
+
       - uses: aquaproj/aqua-installer@11dd79b4e498d471a9385aa9fb7f62bb5f52a73c # v4.0.4
         with:
           aqua_version: v2.59.1
