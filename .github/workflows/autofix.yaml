@@ -11,4 +11,4 @@ jobs:
       - uses: suzuki-shunsuke/go-autofix-action@feat-takumi-guard
         with:
           aqua_version: v2.59.1
-          # takumi_guard_bot_id: ${{secrets.TAKUMI_GUARD_BOT_ID}}
+          takumi_guard_bot_id: ${{secrets.TAKUMI_GUARD_BOT_ID}}
