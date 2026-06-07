@@ -5,7 +5,8 @@ permissions: {}
 jobs:
   autofix:
     runs-on: ubuntu-24.04
-    permissions: {}
+    permissions:
+      id-token: write
     timeout-minutes: 15
     steps:
       - uses: suzuki-shunsuke/go-autofix-action@feat-takumi-guard
