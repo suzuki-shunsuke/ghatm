@@ -8,6 +8,7 @@ jobs:
     permissions: {}
     timeout-minutes: 15
     steps:
-      - uses: suzuki-shunsuke/go-autofix-action@ba716cebb7767055bdde0e62bb91d715bde39ab2 # v0.1.12
+      - uses: suzuki-shunsuke/go-autofix-action@feat-takumi-guard
         with:
           aqua_version: v2.59.1
+          # takumi_guard_bot_id: ${{secrets.TAKUMI_GUARD_BOT_ID}}
