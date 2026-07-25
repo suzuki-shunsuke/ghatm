@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/google/go-github/v89/github"
 )
@@ -27,6 +28,12 @@ func (c *Client) ListWorkflowRuns(ctx context.Context, owner, repo, workflowFile
 	}
 	runs, resp, err := c.actions.ListWorkflowRunsByFileName(ctx, owner, repo, workflowFileName, o)
 	if err != nil {
+		// A workflow that has never run has no workflow runs, so the GitHub API
+		// returns 404 Not Found. This isn't a failure; treat it as if there are
+		// no workflow runs.
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			return nil, resp, nil
+		}
 		return nil, resp, err //nolint:wrapcheck
 	}
 	ret := make([]*WorkflowRun, 0, len(runs.WorkflowRuns))
