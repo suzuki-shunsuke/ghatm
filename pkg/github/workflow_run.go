@@ -19,11 +19,9 @@ type WorkflowRun struct {
 
 func (c *Client) ListWorkflowRuns(ctx context.Context, owner, repo, workflowFileName string, opts *ListWorkflowRunsOptions) ([]*WorkflowRun, *github.Response, error) {
 	o := &github.ListWorkflowRunsOptions{
-		ListOptions: github.ListOptions{
-			PerPage: 100, //nolint:mnd
-			Page:    opts.Page,
-		},
-		Status: opts.Status,
+		PerPage: 100, //nolint:mnd
+		Page:    opts.Page,
+		Status:  opts.Status,
 	}
 	runs, resp, err := c.actions.ListWorkflowRunsByFileName(ctx, owner, repo, workflowFileName, o)
 	if err != nil {
