@@ -28,10 +28,8 @@ type WorkflowJob struct {
 
 func (c *Client) ListWorkflowJobs(ctx context.Context, logger *slog.Logger, owner, repo string, runID int64, opts *ListWorkflowJobsOptions) ([]*WorkflowJob, *github.Response, error) {
 	o := &github.ListWorkflowJobsOptions{
-		ListOptions: github.ListOptions{
-			PerPage: 100, //nolint:mnd
-			Page:    opts.Page,
-		},
+		PerPage: 100, //nolint:mnd
+		Page:    opts.Page,
 	}
 	jobs, resp, err := c.actions.ListWorkflowJobs(ctx, owner, repo, runID, o)
 	if err != nil {
