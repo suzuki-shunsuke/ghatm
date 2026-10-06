@@ -11,7 +11,7 @@ jobs:
     # Get changed files to filter jobs
     outputs:
       renovate-config-validator: ${{steps.changes.outputs.renovate-config-validator}}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     permissions: {}
     steps:
