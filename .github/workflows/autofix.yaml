@@ -3,12 +3,27 @@ name: autofix.ci
 on: pull_request
 permissions: {}
 jobs:
+  gomodule:
+    uses: suzuki-shunsuke/download-go-module-action/.github/workflows/download.yaml@9b315459d80513111c52b004d15ad89e7b3e46b7 # v0.0.4
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      aqua_version: v2.64.0
+      aqua_packages: go-licenses
+    secrets:
+      TAKUMI_GUARD_BOT_ID: ${{secrets.TAKUMI_GUARD_BOT_ID}}
+
   autofix:
     runs-on: ubuntu-26.04
-    permissions:
-      id-token: write
+    needs: gomodule
+    permissions: {}
     timeout-minutes: 15
     steps:
+      - name: Restore Go modules
+        uses: suzuki-shunsuke/download-go-module-action/restore@9b315459d80513111c52b004d15ad89e7b3e46b7 # v0.0.4
+        with:
+          aqua_version: v2.64.0
       - uses: suzuki-shunsuke/go-autofix-action@9a8682f2dc2a935fe2a2ac96deb03de2dfcb872e # v0.1.13
         with:
           aqua_version: v2.64.0
