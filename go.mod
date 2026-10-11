@@ -1,17 +1,17 @@
 module github.com/suzuki-shunsuke/ghatm
 
-go 1.26.4
+go 1.27.2
 
 require (
 	github.com/goccy/go-yaml v1.19.2
 	github.com/google/go-cmp v0.7.0
-	github.com/google/go-github/v88 v88.0.0
+	github.com/google/go-github/v92 v92.0.0
 	github.com/spf13/afero v1.15.0
 	github.com/suzuki-shunsuke/slog-error v0.2.2
 	github.com/suzuki-shunsuke/slog-util v0.3.2
-	github.com/suzuki-shunsuke/urfave-cli-v3-util v0.2.3
-	github.com/urfave/cli/v3 v3.9.0
-	golang.org/x/oauth2 v0.36.0
+	github.com/suzuki-shunsuke/urfave-cli-v3-util v0.2.4
+	github.com/urfave/cli/v3 v3.14.0
+	golang.org/x/oauth2 v0.37.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
