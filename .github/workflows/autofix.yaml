@@ -8,9 +8,6 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    with:
-      aqua_version: v2.64.0
-      aqua_packages: go-licenses
     secrets:
       TAKUMI_GUARD_BOT_ID: ${{secrets.TAKUMI_GUARD_BOT_ID}}
 
