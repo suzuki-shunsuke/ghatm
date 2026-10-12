@@ -13,6 +13,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      pull-requests: write
   status-check:
     runs-on: ubuntu-26.04
     if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
