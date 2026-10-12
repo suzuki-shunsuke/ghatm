@@ -25,6 +25,8 @@ jobs:
       gomodule_artifact_name: gomodule
     permissions:
       contents: read
+      pull-requests: write
+      id-token: write
 
   test:
     uses: ./.github/workflows/wc-test.yaml
