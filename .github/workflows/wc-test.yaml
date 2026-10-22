@@ -20,7 +20,7 @@ jobs:
       - name: Restore Go modules
         uses: suzuki-shunsuke/download-go-module-action/restore@59ba5863b931de21763c13df6ad926cf98158517 # v0.0.8
         with:
-          aqua_version: v2.64.0
+          aqua_version: v2.65.1
 
       - run: go run ./cmd/ghatm set testdata/before.yaml
       - run: diff testdata/before.yaml testdata/after.yaml
