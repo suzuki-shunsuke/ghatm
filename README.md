@@ -74,14 +74,11 @@ aqua g -i suzuki-shunsuke/ghatm
 You can verify downloaded assets using some tools.
 
 1. [GitHub CLI](https://cli.github.com/)
-1. [slsa-verifier](https://github.com/slsa-framework/slsa-verifier)
 1. [Cosign](https://github.com/sigstore/cosign)
+1. [Packslip](https://packslip.dev/) `ghatm >= v1.0.1`
+1. [slsa-verifier](https://github.com/slsa-framework/slsa-verifier) `ghatm <= v1.0.0`
 
---
-
-1. GitHub CLI
-
-ghatm >= v0.3.3
+### 1. GitHub CLI
 
 You can install GitHub CLI by aqua.
 
@@ -90,25 +87,93 @@ aqua g -i cli/cli
 ```
 
 ```sh
-gh release download -R suzuki-shunsuke/ghatm v0.3.3 -p ghatm_darwin_arm64.tar.gz
-gh attestation verify ghatm_darwin_arm64.tar.gz \
+version=v1.0.1
+asset=ghatm_darwin_arm64.tar.gz
+gh release download -R suzuki-shunsuke/ghatm "$version" -p "$asset"
+gh attestation verify "$asset" \
   -R suzuki-shunsuke/ghatm \
   --signer-workflow suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml
 ```
 
-Output:
+### 2. Cosign
 
-```
-Loaded digest sha256:84298e8436f0b2c7f51cd4606848635471a11aaa03d7d0c410727630defe6b7e for file://ghatm_darwin_arm64.tar.gz
-Loaded 1 attestation from GitHub API
-✓ Verification succeeded!
+You can install Cosign by aqua.
 
-sha256:84298e8436f0b2c7f51cd4606848635471a11aaa03d7d0c410727630defe6b7e was attested by:
-REPO                                 PREDICATE_TYPE                  WORKFLOW
-suzuki-shunsuke/go-release-workflow  https://slsa.dev/provenance/v1  .github/workflows/release.yaml@7f97a226912ee2978126019b1e95311d7d15c97a
+```sh
+aqua g -i sigstore/cosign
 ```
 
-2. slsa-verifier
+From ghatm v1.0.1, the bundle file is `ghatm_<version>_checksums.txt.sigstore.json`.
+Cosign v2.4.2 or later is required.
+
+```sh
+version=v1.0.1
+checksum_file="ghatm_${version#v}_checksums.txt"
+asset=ghatm_darwin_arm64.tar.gz
+gh release download "$version" \
+  -R suzuki-shunsuke/ghatm \
+  -p "$asset" \
+  -p "$checksum_file" \
+  -p "${checksum_file}.sigstore.json"
+cosign verify-blob \
+  "$checksum_file" \
+  --bundle "${checksum_file}.sigstore.json" \
+  --certificate-identity-regexp 'https://github\.com/suzuki-shunsuke/go-release-workflow/\.github/workflows/release\.yaml@.*' \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
+cat "$checksum_file" | sha256sum -c --ignore-missing -
+```
+
+For ghatm v1.0.0 or older, `*.pem` and `*.sig` are available instead.
+
+```sh
+version=v1.0.0
+checksum_file="ghatm_${version#v}_checksums.txt"
+asset=ghatm_darwin_arm64.tar.gz
+gh release download "$version" \
+  -R suzuki-shunsuke/ghatm \
+  -p "$asset" \
+  -p "$checksum_file" \
+  -p "${checksum_file}.pem" \
+  -p "${checksum_file}.sig"
+cosign verify-blob \
+  --signature "${checksum_file}.sig" \
+  --certificate "${checksum_file}.pem" \
+  --certificate-identity-regexp 'https://github\.com/suzuki-shunsuke/go-release-workflow/\.github/workflows/release\.yaml@.*' \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+  "$checksum_file"
+cat "$checksum_file" | sha256sum -c --ignore-missing -
+```
+
+### 3. Packslip
+
+`ghatm >= v1.0.1`
+
+You can install packslip by aqua.
+
+```sh
+aqua g -i jdx/packslip
+```
+
+```sh
+version=v1.0.1
+asset=ghatm_darwin_arm64.tar.gz
+gh release download -R suzuki-shunsuke/ghatm "$version" -p "$asset" -p packslip.sigstore.json
+packslip verify packslip.sigstore.json \
+    --pin ps1_u3uzfz3n2bowmhmt65tddssvri \
+    --identity-prefix https://github.com/suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml@ \
+    --artifact "$asset"
+```
+
+- `--pin` requires the release to be signed from the repository `suzuki-shunsuke/ghatm`, identified by its repository ID rather than its name
+- `--identity-prefix` requires the release to be signed by the release workflow of [suzuki-shunsuke/go-release-workflow](https://github.com/suzuki-shunsuke/go-release-workflow)
+
+On success, packslip prints a line starting with `ok:`.
+Please make sure it shows the project and version you meant, e.g. `github.com/suzuki-shunsuke/ghatm 1.0.1`.
+
+### 4. slsa-verifier
+
+> [!WARNING]
+> As of ghatm v1.0.1, `multiple.intoto.jsonl` hasn't been published anymore.
 
 You can install slsa-verifier by aqua.
 
@@ -117,49 +182,13 @@ aqua g -i slsa-framework/slsa-verifier
 ```
 
 ```sh
-gh release download -R suzuki-shunsuke/ghatm v0.3.3 -p ghatm_darwin_arm64.tar.gz  -p multiple.intoto.jsonl
-slsa-verifier verify-artifact ghatm_darwin_arm64.tar.gz \
+version=v1.0.0
+asset=ghatm_darwin_arm64.tar.gz
+gh release download -R suzuki-shunsuke/ghatm "$version" -p "$asset" -p multiple.intoto.jsonl
+slsa-verifier verify-artifact "$asset" \
   --provenance-path multiple.intoto.jsonl \
   --source-uri github.com/suzuki-shunsuke/ghatm \
-  --source-tag v0.3.3
-```
-
-Output:
-
-```
-Verified signature against tlog entry index 137035428 at URL: https://rekor.sigstore.dev/api/v1/log/entries/108e9186e8c5677a421587935f03afc5f73475e880b6f05962c5be8726ccb5011b7bf62a5d2a58bb
-Verified build using builder "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@refs/tags/v2.0.0" at commit 1af80d4aa0b6cc45bda5677fd45202ee2b90e1fc
-Verifying artifact ghatm_darwin_arm64.tar.gz: PASSED
-```
-
-3. Cosign
-
-You can install Cosign by aqua.
-
-```sh
-aqua g -i sigstore/cosign
-```
-
-```sh
-gh release download -R suzuki-shunsuke/ghatm v0.3.3
-cosign verify-blob \
-  --signature ghatm_0.3.3_checksums.txt.sig \
-  --certificate ghatm_0.3.3_checksums.txt.pem \
-  --certificate-identity-regexp 'https://github\.com/suzuki-shunsuke/go-release-workflow/\.github/workflows/release\.yaml@.*' \
-  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
-  ghatm_0.3.3_checksums.txt
-```
-
-Output:
-
-```
-Verified OK
-```
-
-After verifying the checksum, verify the artifact.
-
-```sh
-cat ghatm_0.3.3_checksums.txt | sha256sum -c --ignore-missing
+  --source-tag "$version"
 ```
 
 </details>
