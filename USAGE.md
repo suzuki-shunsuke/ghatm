@@ -11,7 +11,7 @@ USAGE:
    ghatm [global options] [command [command options]]
 
 VERSION:
-   1.0.0
+   1.0.1
 
 COMMANDS:
    set         Set timeout-minutes to GitHub Actions jobs which don't have timeout-minutes
@@ -34,13 +34,7 @@ NAME:
    ghatm set - Set timeout-minutes to GitHub Actions jobs which don't have timeout-minutes
 
 USAGE:
-   ghatm set
-
-DESCRIPTION:
-   Set timeout-minutes to GitHub Actions jobs which don't have timeout-minutes.
-
-   $ ghatm set
-
+   ghatm set [options] [file ...] 
 
 OPTIONS:
    --log-level string             log level
@@ -60,11 +54,15 @@ NAME:
    ghatm version - Show version
 
 USAGE:
-   ghatm version
+   ghatm version [options]
 
 OPTIONS:
    --json, -j  Output version in JSON format
    --help, -h  show help
+
+GLOBAL OPTIONS:
+   --log-level string  log level
+   --log-color string  Log color. One of 'auto', 'always' (default), 'never'
 ```
 
 ## ghatm completion
@@ -75,7 +73,7 @@ NAME:
    ghatm completion - Output shell completion script for bash, zsh, fish, or Powershell
 
 USAGE:
-   ghatm completion
+   ghatm completion [command [command options]]
 
 DESCRIPTION:
    Output shell completion script for bash, zsh, fish, or Powershell.
@@ -91,8 +89,70 @@ DESCRIPTION:
    ghatm completion fish > ~/.config/fish/completions/ghatm.fish
 
    # Powershell
-   Output the script to path/to/autocomplete/ghatm.ps1 an run it.
+   Output the script to path/to/autocomplete/ghatm.ps1 and run it.
 
+
+COMMANDS:
+   bash  Output bash completion script
+   zsh   Output zsh completion script
+   fish  Output fish completion script
+   pwsh  Output pwsh completion script
+
+OPTIONS:
+   --help, -h  show help
+```
+
+### completion bash
+
+```console
+$ completion bash --help
+NAME:
+   ghatm completion bash - Output bash completion script
+
+USAGE:
+   ghatm completion bash [options]
+
+OPTIONS:
+   --help, -h  show help
+```
+
+### completion zsh
+
+```console
+$ completion zsh --help
+NAME:
+   ghatm completion zsh - Output zsh completion script
+
+USAGE:
+   ghatm completion zsh [options]
+
+OPTIONS:
+   --help, -h  show help
+```
+
+### completion fish
+
+```console
+$ completion fish --help
+NAME:
+   ghatm completion fish - Output fish completion script
+
+USAGE:
+   ghatm completion fish [options]
+
+OPTIONS:
+   --help, -h  show help
+```
+
+### completion pwsh
+
+```console
+$ completion pwsh --help
+NAME:
+   ghatm completion pwsh - Output pwsh completion script
+
+USAGE:
+   ghatm completion pwsh [options]
 
 OPTIONS:
    --help, -h  show help
